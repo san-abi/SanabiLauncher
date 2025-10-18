@@ -3,7 +3,6 @@ using Avalonia.Controls;
 using Avalonia.Media;
 using Avalonia.Media.Imaging;
 using Avalonia.Threading;
-using ReactiveUI;
 using System;
 using System.Collections.Generic;
 using System.IO;
@@ -64,7 +63,6 @@ public sealed partial class MainWindowContent : UserControl
         {
             Source = bitmap,
             Stretch = Stretch.UniformToFill,
-            //Opacity = 0.5,
         };
 
         return image;
