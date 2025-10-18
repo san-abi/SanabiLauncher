@@ -38,7 +38,7 @@
         <v:IconLabel Icon="{DynamicResource ButtonIcon-plus}" Height="20" Width="20" />
       </Button>
       <!-- TODO: Fix icon being cut off -->
-      <Button DockPanel.Dock="Right" Classes="OpenBoth" Command="{Binding ToggleFavoritesListVisible}" IsEnabled="{Binding !FavoritesEmpty}">
+      <Button DockPanel.Dock="Right" Classes="OpenBoth" Command="{Binding ToggleFavoritesListVisible}" IsVisible="{Binding !FavoritesEmpty}">
         <v:IconLabel Icon="{DynamicResource ButtonIcon-vv}" Height="20" Width="13" /> 
       </Button>
       <Button DockPanel.Dock="Right" Classes="OpenRight" Command="{Binding RefreshPressed}"

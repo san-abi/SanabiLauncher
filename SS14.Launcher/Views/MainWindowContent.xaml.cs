@@ -24,7 +24,7 @@ public sealed partial class MainWindowContent : UserControl
         if (!Directory.Exists(ScreensPath))
             return;
 
-        foreach (var file in Directory.GetFiles(ScreensPath, "*.jpg"))
+        foreach (var file in Directory.GetFiles(ScreensPath, "*"))
         {
             using var stream = File.OpenRead(file);
             _screens.Add(new Bitmap(stream));
