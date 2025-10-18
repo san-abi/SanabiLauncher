@@ -14,8 +14,16 @@
 
   <DockPanel>
     <!-- Header controls -->
-    <DockPanel DockPanel.Dock="Top" LastChildFill="False" Margin="4, 0, 4, 2">
-      <TextBlock DockPanel.Dock="Left" Text="{loc:Loc tab-home-favorite-servers}" Classes="NanoHeadingMedium" />
+
+    <!-- Footer controls -->
+    <DockPanel DockPanel.Dock="Bottom" LastChildFill="False" Margin="4 4 4 0" Height="32">
+      <Button DockPanel.Dock="Left" Classes="OpenRight"
+              Content="{loc:Loc tab-home-direct-connect}"
+              Command="{Binding DirectConnectPressed}" />
+      <Button DockPanel.Dock="Left" Classes="OpenLeft"
+              Content="{loc:Loc tab-home-run-content-bundle}"
+              Click="OpenReplayClicked" />
+
       <Button DockPanel.Dock="Right" Classes="OpenLeft" Command="{Binding AddFavoritePressed}"
               ToolTip.Tip="{loc:Loc tab-home-add-favorite}">
         <v:IconLabel Icon="{DynamicResource ButtonIcon-plus}" Height="20" Width="20" />
@@ -26,24 +34,13 @@
       </Button>
     </DockPanel>
 
-    <!-- Footer controls -->
-    <DockPanel DockPanel.Dock="Bottom" LastChildFill="False" Margin="4 4 4 0" Height="32">
-      <Button DockPanel.Dock="Left" Classes="OpenRight"
-              Content="{loc:Loc tab-home-direct-connect}"
-              Command="{Binding DirectConnectPressed}" />
-      <Button DockPanel.Dock="Left" Classes="OpenLeft"
-              Content="{loc:Loc tab-home-run-content-bundle}"
-              Click="OpenReplayClicked" />
-    </DockPanel>
-
-    <Panel DockPanel.Dock="Bottom" Classes="ScrollViewerSep" />
-    <Panel DockPanel.Dock="Top" Classes="ScrollViewerSep" />
     <Panel>
       <mwt:ServerList List="{Binding Favorites}" IsVisible="{Binding !FavoritesEmpty}">
         <Button Content="{loc:Loc tab-home-go-to-servers-tab}"
                 Command="{Binding MainWindowViewModel.SelectTabServers}" />
       </mwt:ServerList>
 
+      <!--
       <StackPanel IsVisible="{Binding FavoritesEmpty}"
                   Orientation="Vertical" VerticalAlignment="Center">
         <TextBlock Text="{loc:Loc tab-home-favorites-guide}" HorizontalAlignment="Center"
@@ -52,6 +49,7 @@
                 Command="{Binding MainWindowViewModel.SelectTabServers}"
                 HorizontalAlignment="Center" />
       </StackPanel>
+      -->
     </Panel>
   </DockPanel>
 </UserControl>

@@ -7,6 +7,7 @@ using System.Net.Http;
 using System.Reactive.Linq;
 using System.Text.RegularExpressions;
 using System.Threading.Tasks;
+using Avalonia.Animation;
 using Avalonia.Platform.Storage;
 using DynamicData;
 using ReactiveUI;
@@ -59,7 +60,7 @@ public sealed class MainWindowViewModel : ViewModelBase, IErrorOverlayOwner
         var tabs = new List<MainWindowTabViewModel>();
         tabs.Add(HomeTab);
         tabs.Add(ServersTab);
-        tabs.Add(NewsTab);
+        //tabs.Add(NewsTab);
         tabs.Add(OptionsTab);
 #if DEVELOPMENT
         tabs.Add(new DevelopmentTabViewModel());
@@ -101,6 +102,13 @@ public sealed class MainWindowViewModel : ViewModelBase, IErrorOverlayOwner
 
     public IReadOnlyList<MainWindowTabViewModel> Tabs { get; }
 
+    private bool _transitioningImagesVisible;
+    public bool TransitioningImagesVisible
+    {
+        get => _transitioningImagesVisible;
+        set => this.RaiseAndSetIfChanged(ref _transitioningImagesVisible, value);
+    }
+
     public bool LoggedIn => _loginMgr.ActiveAccount != null;
     private string? Username => _loginMgr.ActiveAccount?.Username;
     public bool AccountDropDownVisible => _loginMgr.Logins.Count != 0;
@@ -133,6 +141,8 @@ public sealed class MainWindowViewModel : ViewModelBase, IErrorOverlayOwner
         var tab = Tabs[_selectedIndex];
         tab.IsSelected = true;
         tab.Selected();
+
+        TransitioningImagesVisible = tab == HomeTab;
     }
 
     public ICVarEntry<bool> HasDismissedEarlyAccessWarning => Cfg.GetCVarEntry(CVars.HasDismissedEarlyAccessWarning);

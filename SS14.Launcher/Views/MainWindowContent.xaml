@@ -13,43 +13,49 @@
   </Design.DataContext>
 
   <Panel>
+    <Grid IsVisible="{Binding TransitioningImagesVisible}" x:Name="ImageTransitionGrid">
+      <TransitioningContentControl x:Name="ImageTransition"
+                                  HorizontalAlignment="Stretch"
+                                  VerticalAlignment="Stretch"
+                                  HorizontalContentAlignment="Center"
+                                  VerticalContentAlignment="Stretch">
+      </TransitioningContentControl>
+    </Grid>
+
     <DockPanel LastChildFill="true">
       <!-- Header -->
       <Panel DockPanel.Dock="Top">
-        <Panel.Background>
-          <SolidColorBrush Color="#212126" />
-        </Panel.Background>
 
         <DockPanel Name="HeaderPanel" Classes="MainWindowHeader">
-          <!-- Logo -->
+          <!-- Logo
           <Image DockPanel.Dock="Left" HorizontalAlignment="Left" Height="60" Margin="0, 0, 0, 8"
-                 Source="{DynamicResource LogoLong}" />
+                 Source="{DynamicResource LogoLong}" /> -->
           <!--<v:Logo DockPanel.Dock="Left" Height="60" HorizontalAlignment="Left" Margin="0, 8"></v:Logo>-->
           <Grid DockPanel.Dock="Right" HorizontalAlignment="Right" VerticalAlignment="Center"
-                ColumnDefinitions="Auto, Auto" RowDefinitions="Auto, Auto" Margin="0, 0, 3, 0">
+                ColumnDefinitions="Auto, Auto, Auto, Auto" Margin="0, 0, 3, 0">
+            <!-- Account drop down -->
+            <v:AccountDropDown Grid.Column="0" Margin="0, 0, 2, 0" MinWidth="90"
+                               IsEnabled="{Binding $parent.DataContext.AccountDropDownVisible}"
+                               DataContext="{Binding AccountDropDown}" />
+
             <!-- Discord link -->
-            <Button Grid.Row="0" Grid.Column="0" MinWidth="90"
+            <Button Grid.Column="1" MinWidth="90"
                     Command="{Binding OnDiscordButtonPressed}" Classes="OpenBoth"
-                    Margin="0, 6, 2, 2">
+                    Margin="0, 0, 2, 0">
               <v:IconLabel Icon="{DynamicResource InfoIcon-discord}"
                            Content="{loc:Loc main-window-header-link-discord}" />
             </Button>
 
             <!-- Website link -->
-            <Button Grid.Row="0" Grid.Column="1" MinWidth="90"
+            <Button Grid.Column="2" MinWidth="90"
                     Command="{Binding OnWebsiteButtonPressed}" Classes="OpenLeft"
-                    Margin="0, 6, 0, 2">
+                    Margin="0, 0, 0, 0">
               <v:IconLabel Icon="{DynamicResource InfoIcon-web}" Content="{loc:Loc main-window-header-link-website}" />
             </Button>
-
-            <!-- Account drop down -->
-            <v:AccountDropDown Grid.ColumnSpan="2" Grid.Row="1"
-                               IsEnabled="{Binding $parent.DataContext.AccountDropDownVisible}"
-                               DataContext="{Binding AccountDropDown}" />
           </Grid>
         </DockPanel>
       </Panel>
-      <Panel DockPanel.Dock="Top" Classes="GoldLineHorizontal" />
+      
       <Grid>
         <!-- Main tabbed layout when logged in -->
         <TabControl IsVisible="{Binding LoggedIn}" ItemsSource="{Binding Tabs}" TabStripPlacement="Bottom"
