@@ -54,15 +54,21 @@ public class HomePageViewModel : MainWindowTabViewModel
             .Subscribe(_ =>
             {
                 FavoritesEmpty = favorites.Count == 0;
+                FavoritesListVisible &= !FavoritesEmpty;
             });
 
         Favorites = favorites;
+
+        FavoritesEmpty = favorites.Count == 0;
+        // when starting the launcher, favorites list will start visible if we have any favorites
+        FavoritesListVisible = !FavoritesEmpty;
     }
 
     public ReadOnlyObservableCollection<ServerEntryViewModel> Favorites { get; }
     public ObservableCollection<ServerEntryViewModel> Suggestions { get; } = new();
 
     [Reactive] public bool FavoritesEmpty { get; private set; } = true;
+    [Reactive] public bool FavoritesListVisible { get; private set; } = false;
 
     public override string Name => LocalizationManager.Instance.GetString("tab-home-title");
     public Control? Control { get; set; }
@@ -125,18 +131,11 @@ public class HomePageViewModel : MainWindowTabViewModel
         _serverListCache.RequestInitialUpdate();
     }
 
-    private bool _favoritesListVisible = true;
-    public bool FavoritesListVisible
+    public void ToggleFavoritesListVisible()
     {
-        get => _favoritesListVisible;
-        set
-        {
-            this.RaiseAndSetIfChanged(ref _favoritesListVisible, value);
-        }
-    }
+        if (FavoritesEmpty)
+            return; // FavoritesListVisible is going to be false here, and we shouldnt make it true
 
-    public async void ToggleFavoritesListVisible()
-    {
         FavoritesListVisible = !FavoritesListVisible;
     }
 }

@@ -11,6 +11,9 @@
         <TargetFramework>net9.0</TargetFramework>
         <Version>0.35.0</Version>
 
+        <LangVersion>preview</LangVersion>
+        <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
+
         <!--
         CET breaks for people on older, but still supported Windows versions:
         https://github.com/space-wizards/SS14.Launcher/issues/198

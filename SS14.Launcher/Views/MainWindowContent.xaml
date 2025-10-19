@@ -6,6 +6,7 @@
              xmlns:v="clr-namespace:SS14.Launcher.Views"
              xmlns:loc="clr-namespace:SS14.Launcher.Localization"
              xmlns:mainWindowTabs="clr-namespace:SS14.Launcher.ViewModels.MainWindowTabs"
+             xmlns:avalonia="clr-namespace:Avalonia.Controls;assembly=Avalonia.Controls"
              mc:Ignorable="d" d:DesignWidth="800" d:DesignHeight="450"
              x:Class="SS14.Launcher.Views.MainWindowContent">
   <Design.DataContext>
@@ -18,8 +19,13 @@
                                   HorizontalAlignment="Stretch"
                                   VerticalAlignment="Stretch"
                                   HorizontalContentAlignment="Center"
-                                  VerticalContentAlignment="Stretch">
-      </TransitioningContentControl>
+                                  VerticalContentAlignment="Stretch" />
+
+      <Border Background="#80000000"
+              DataContext="{Binding HomeTab}"
+              IsVisible="{Binding FavoritesListVisible}"
+              IsHitTestVisible="False">
+      </Border>
     </Grid>
 
     <DockPanel LastChildFill="true">

@@ -6,6 +6,7 @@ using Avalonia.Threading;
 using System;
 using System.Collections.Generic;
 using System.IO;
+using System.Runtime.CompilerServices;
 
 namespace SS14.Launcher.Views;
 
@@ -15,7 +16,6 @@ public sealed partial class MainWindowContent : UserControl
     private readonly List<Bitmap> _screens = new();
     private readonly List<Image> _screenControls = new();
     private int _currentIndex = 0;
-    private Random random = new();
 
     public MainWindowContent()
     {
@@ -33,7 +33,7 @@ public sealed partial class MainWindowContent : UserControl
         if (_screens.Count == 0)
             return;
 
-        _currentIndex = random.Next(_screens.Count);
+        _currentIndex = new Random().Next(_screens.Count);
         foreach (var bitmap in _screens)
             _screenControls.Add(CreateImageControl(bitmap));
 
@@ -43,9 +43,9 @@ public sealed partial class MainWindowContent : UserControl
         if (_screens.Count <= 1)
             return;
 
-        ImageTransition.PageTransition = new CrossFade(TimeSpan.FromSeconds(5));
+        ImageTransition.PageTransition = new CrossFade(TimeSpan.FromSeconds(3));
 
-        var timer = new DispatcherTimer { Interval = TimeSpan.FromSeconds(25) };
+        var timer = new DispatcherTimer { Interval = TimeSpan.FromSeconds(15) };
         timer.Tick += (_, _) => OnTick();
         timer.Start();
     }
