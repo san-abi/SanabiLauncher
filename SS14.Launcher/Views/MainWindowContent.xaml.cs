@@ -43,9 +43,9 @@ public sealed partial class MainWindowContent : UserControl
         if (_screens.Count <= 1)
             return;
 
-        ImageTransition.PageTransition = new CrossFade(TimeSpan.FromSeconds(3));
+        ImageTransition.PageTransition = new CrossFade(TimeSpan.FromSeconds(5));
 
-        var timer = new DispatcherTimer { Interval = TimeSpan.FromSeconds(15) };
+        var timer = new DispatcherTimer { Interval = TimeSpan.FromSeconds(45) };
         timer.Tick += (_, _) => OnTick();
         timer.Start();
     }
