@@ -47,6 +47,8 @@ public class ServerListTabViewModel : MainWindowTabViewModel
                     return _loc.GetString("tab-servers-list-status-partial-error");
                 case RefreshListStatus.UpdatingMaster:
                     return _loc.GetString("tab-servers-list-status-updating-master");
+                case RefreshListStatus.Pinging:
+                    return "Pinging servers…";
                 case RefreshListStatus.NotUpdated:
                     return "";
                 case RefreshListStatus.Updated:

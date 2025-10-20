@@ -109,6 +109,8 @@ public sealed class ServerEntryViewModel : ObservableRecipient, IRecipient<Favor
 
     public DateTime? RoundStartTime => _cacheData.RoundStartTime;
 
+    public string PingString => _cacheData.Ping == null ? "T/O" : $"{_cacheData.Ping.Value.Milliseconds}ms";
+
     public string RoundStatusString =>
         _cacheData.RoundStatus == GameRoundStatus.InLobby
             ? _loc.GetString("server-entry-status-lobby")
@@ -239,6 +241,10 @@ public sealed class ServerEntryViewModel : ObservableRecipient, IRecipient<Favor
 
             case nameof(IServerStatusData.RoundStartTime):
                 OnPropertyChanged(nameof(RoundStartTime));
+                break;
+
+            case nameof(IServerStatusData.Ping):
+                OnPropertyChanged(nameof(PingString));
                 break;
 
             case nameof(IServerStatusData.RoundStatus):

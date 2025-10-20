@@ -13,6 +13,8 @@ using ReactiveUI.Fody.Helpers;
 using SS14.Launcher.Api;
 using SS14.Launcher.Models.Data;
 using static SS14.Launcher.Api.HubApi;
+using Sanabi.Framework.Misc.Net;
+using Sanabi.Framework.Misc;
 
 namespace SS14.Launcher.Models.ServerStatus;
 
@@ -129,12 +131,30 @@ public sealed class ServerListCache : ReactiveObject, IServerSource
                 }
             }
 
-            _allServers.AddItems(entries.Select(entry =>
+            // TODO: Optimise this o algo.
+            Status = RefreshListStatus.Pinging;
+            var serverTasks = entries.Select(async entry =>
             {
                 var statusData = new ServerStatusData(entry.Address, entry.HubAddress);
-                ServerStatusCache.ApplyStatus(statusData, entry.StatusData);
+                TimeSpan? roundTripTime = null;
+                try
+                {
+                    var (pingSuccess, maybeRoundTripTime) = await NetHelpers.TryPingIcmpAsync(entry.Address);
+                    if (pingSuccess)
+                        roundTripTime = maybeRoundTripTime;
+                }
+                catch (Exception ex)
+                {
+                    SanabiLogger.LogError($"Exception! {ex}");
+                    return statusData;
+                }
+
+                ServerStatusCache.ApplyStatus(statusData, entry.StatusData, roundTripTime);
                 return statusData;
-            }));
+            });
+            Status = RefreshListStatus.UpdatingMaster;
+
+            _allServers.AddItems(await Task.WhenAll(serverTasks));
 
             if (_allServers.Count == 0)
                 // We did not get any servers
@@ -205,6 +225,12 @@ public enum RefreshListStatus
     /// Fetching master server list.
     /// </summary>
     UpdatingMaster,
+
+    /// <summary>
+    /// Pinging servers while updating master btw if that even matters.
+    /// </summary>
+    // this doesnt even work btw
+    Pinging,
 
     /// <summary>
     /// Fetched information from ALL servers from the hub.

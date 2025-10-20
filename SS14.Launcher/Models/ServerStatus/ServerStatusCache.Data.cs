@@ -44,8 +44,9 @@ public sealed class ServerStatusData : ObservableObject, IServerStatusData
         set => SetProperty(ref _desc, value);
     }
 
-    // BUG: This ping stat is completely wrong currently.
-    // See the assignment in ServerStatusCache.cs for why.
+    /// <summary>
+    ///     Round-trip-time between the client and server.
+    /// </summary>
     public TimeSpan? Ping
     {
         get => _ping;

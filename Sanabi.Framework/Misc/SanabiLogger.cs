@@ -1,4 +1,6 @@
-namespace Sanabi.Misc;
+using System.Diagnostics.Contracts;
+
+namespace Sanabi.Framework.Misc;
 
 /// <summary>
 ///     Logging API for SanabiLauncher.
@@ -12,6 +14,7 @@ public static class SanabiLogger
         Console.ResetColor();
     }
 
+    [Pure]
     public static void Log(string message)
     {
         Console.WriteLine($"[SANABI]: {message}");

@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.IO;
 using System.Linq;
 using System.Net.Http;
@@ -111,7 +112,7 @@ public sealed class ServerStatusCache : IServerSource
                 return;
             }
 
-            ApplyStatus(data, status);
+            ApplyStatus(data, status, null);
         }
         catch (OperationCanceledException)
         {
@@ -119,12 +120,13 @@ public sealed class ServerStatusCache : IServerSource
         }
     }
 
-    public static void ApplyStatus(ServerStatusData data, ServerApi.ServerStatus status)
+    public static void ApplyStatus(ServerStatusData data, ServerApi.ServerStatus status, TimeSpan? roundTripTime)
     {
         data.Status = ServerStatusCode.Online;
         data.Name = status.Name;
         data.PlayerCount = Math.Max(0, status.PlayerCount);
         data.SoftMaxPlayerCount = Math.Max(0, status.SoftMaxPlayerCount);
+        data.Ping = roundTripTime;
 
         switch (status.RunLevel)
         {
