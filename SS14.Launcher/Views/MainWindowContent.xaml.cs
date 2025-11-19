@@ -6,7 +6,6 @@ using Avalonia.Threading;
 using System;
 using System.Collections.Generic;
 using System.IO;
-using System.Runtime.CompilerServices;
 
 namespace SS14.Launcher.Views;
 
