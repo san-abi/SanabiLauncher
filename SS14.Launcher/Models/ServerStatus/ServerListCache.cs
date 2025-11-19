@@ -59,10 +59,10 @@ public sealed class ServerListCache : ReactiveObject, IServerSource
         _refreshCancel?.Cancel();
         _allServers.Clear();
         _refreshCancel = new CancellationTokenSource(10000);
-        RefreshServerList(_refreshCancel.Token);
+        RefreshServerList(ConfigConstants.DefaultHubUrls, _refreshCancel.Token);
     }
 
-    public async void RefreshServerList(CancellationToken cancel)
+    public async void RefreshServerList(UrlFallbackSet[] hubUrls, CancellationToken cancel)
     {
         _allServers.Clear();
         Status = RefreshListStatus.UpdatingMaster;
@@ -74,7 +74,7 @@ public sealed class ServerListCache : ReactiveObject, IServerSource
             var allSucceeded = true;
 
             // Queue requests
-            foreach (var hub in ConfigConstants.DefaultHubUrls)
+            foreach (var hub in hubUrls)
             {
                 requests.Add((_hubApi.GetServers(hub, cancel), new Uri(hub.Urls[0])));
             }
@@ -231,7 +231,6 @@ public enum RefreshListStatus
     /// <summary>
     /// Pinging servers while updating master btw if that even matters.
     /// </summary>
-    // this doesnt even work btw
     Pinging,
 
     /// <summary>

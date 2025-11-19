@@ -138,8 +138,7 @@ public static class HappyEyeballsHttp
         if (IPAddress.TryParse(endPoint.Host, out var ip))
             return [ip];
 
-        var entry = await Dns.GetHostEntryAsync(endPoint.Host, cancel).ConfigureAwait(false);
-        return entry.AddressList;
+        return await Dns.GetHostAddressesAsync(endPoint.Host, cancel).ConfigureAwait(false);
     }
 
     private static IPAddress[] SortInterleaved(IPAddress[] addresses)
