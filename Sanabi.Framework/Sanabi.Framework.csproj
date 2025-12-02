@@ -1,4 +1,6 @@
 <Project Sdk="Microsoft.NET.Sdk">
+    <Import Project="../Launcher.props" />
+
     <PropertyGroup>
         <ImplicitUsings>enable</ImplicitUsings>
         <IsPackable>false</IsPackable>

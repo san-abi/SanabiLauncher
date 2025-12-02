@@ -1,0 +1,29 @@
+{
+    // Use IntelliSense to learn about possible attributes.
+    // Hover to view descriptions of existing attributes.
+    // For more information, visit: https://go.microsoft.com/fwlink/?linkid=830387
+    "version": "0.2.0",
+    "configurations": [
+        // Client configurations
+        {
+            "name": "Debug",
+            "type": "coreclr",
+            "request": "launch",
+            "program": "${workspaceFolder}/SS14.Launcher/bin/Debug/net9.0/SS14.Launcher.dll",
+            "args": [],
+            "console": "internalConsole",
+            "stopAtEntry": false,
+            "preLaunchTask": "build",
+        },
+        {
+            "name": "Release",
+            "type": "coreclr",
+            "request": "launch",
+            "program": "${workspaceFolder}/SS14.Launcher/bin/Release/net9.0/SS14.Launcher.dll",
+            "args": [],
+            "console": "internalConsole",
+            "stopAtEntry": false,
+            "preLaunchTask": "build - Release",
+        }
+    ]
+}
