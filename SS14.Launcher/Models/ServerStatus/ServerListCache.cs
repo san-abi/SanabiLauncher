@@ -130,7 +130,7 @@ public sealed class ServerListCache : ReactiveObject, IServerSource
             }
 
             Status = RefreshListStatus.Pinging;
-            var serverTasks = entries.Select(async entry =>
+            var serverTasks = entries.Select(/*async */entry =>
             {
                 var statusData = new ServerStatusData(entry.Address, entry.HubAddress);
                 TimeSpan? roundTripTime = null;
@@ -153,7 +153,8 @@ public sealed class ServerListCache : ReactiveObject, IServerSource
             });
             Status = RefreshListStatus.UpdatingMaster;
 
-            _allServers.AddItems(await Task.WhenAll(serverTasks));
+            //_allServers.AddItems(await Task.WhenAll(serverTasks));
+            _allServers.AddItems(serverTasks);
 
             if (_allServers.Count == 0)
                 // We did not get any servers
