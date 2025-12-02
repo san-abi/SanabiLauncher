@@ -26,7 +26,7 @@ using SS14.Launcher.Models.OverrideAssets;
 using SS14.Launcher.Utility;
 using TerraFX.Interop.Windows;
 using LogEventLevel = Serilog.Events.LogEventLevel;
-using System.Threading.Tasks;
+using Sanabi.Framework;
 
 namespace SS14.Launcher;
 
@@ -234,6 +234,8 @@ internal static class Program
         }
 
         Log.Information($"НАШ fingerprint: {cfg.DynamicFingerprint}");
+        SanabiEntry.Initialise();
+
         Locator.CurrentMutable.RegisterConstant(http);
 
         var loc = new LocalizationManager(cfg);

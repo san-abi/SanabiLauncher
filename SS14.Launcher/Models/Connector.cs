@@ -634,6 +634,9 @@ public partial class Connector : ReactiveObject
             var buf = new byte[4096];
             while (true)
             {
+                if (await reader.ReadLineAsync() is { } line)
+                    Console.WriteLine($"OUT> {line}");
+
                 var read = await readStream.ReadAsync(buf);
                 if (read == 0)
                 {

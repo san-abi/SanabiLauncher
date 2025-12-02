@@ -6,8 +6,12 @@ using System.IO.Compression;
 using System.Reflection;
 using System.Runtime.InteropServices;
 using System.Runtime.Loader;
+using HarmonyLib;
 using NSec.Cryptography;
 using Robust.LoaderApi;
+using Sanabi.Framework.Game.Managers;
+using Sanabi.Framework.Game.Patches;
+using Sanabi.Framework.Patching;
 
 namespace SS14.Loader;
 
@@ -53,8 +57,37 @@ internal class Program
             return false;
         }
 
+        if (!TryOpenAssembly("Robust.Shared", out var sharedEngineAssembly))
+        {
+            Console.WriteLine("Unable to locate Robust.Shared.dll in engine build!");
+            return false;
+        }
+
         if (!TryGetLoader(clientAssembly, out var loader))
             return false;
+
+        AssemblyManager.Assemblies["Robust.Client"] = clientAssembly;
+        AssemblyManager.Assemblies["Robust.Shared"] = sharedEngineAssembly;
+
+        if (AssemblyManager.TryGetAssembly("Robust.Client", out _))
+        {
+            Console.WriteLine($"Harmony {(HarmonyManager.Harmony == null ? "is broken" : "exists")}");
+            HarmonyManager.BypassAnticheat();
+
+            var modloader = ReflectionManager.GetTypeByQualifiedName("Robust.Shared.ContentPack.ModLoader");
+            PatchHelpers.PatchPrefixFalse(modloader.GetMethod("SetUseLoadContext")!);
+
+            AssemblyLoadPatch.Patch();
+
+            AssemblyManager.QueryAssemblies();
+            AssemblyManager.Subscribe();
+        }
+        else
+        {
+            Console.WriteLine("Deemed dangerous to bypass");
+        }
+        Console.WriteLine("lsasm dump:");
+
 
 #if USE_SYSTEM_SQLITE
         SQLitePCL.raw.SetProvider(new SQLitePCL.SQLite3Provider_sqlite3());
@@ -83,6 +116,7 @@ internal class Program
         finally
         {
             contentApi?.Dispose();
+            AssemblyManager.Unsubscribe();
         }
         return true;
     }
@@ -105,7 +139,8 @@ internal class Program
             return false;
         }
 
-        loader = (ILoaderEntryPoint) Activator.CreateInstance(type)!;
+        loader = (ILoaderEntryPoint)Activator.CreateInstance(type)!;
+        Console.WriteLine($"Got loader assembly: {clientAssembly.FullName}");
         return true;
     }
 
@@ -114,7 +149,7 @@ internal class Program
         return TryOpenAssembly(arg2.Name!, out var assembly) ? assembly : null;
     }
 
-    private bool TryOpenAssembly(string name, [NotNullWhen(true)] out Assembly? assembly)
+    public bool TryOpenAssembly(string name, [NotNullWhen(true)] out Assembly? assembly)
     {
         if (!TryOpenAssemblyStream(name, out var asm, out var pdb))
         {
@@ -126,7 +161,7 @@ internal class Program
         return true;
     }
 
-    private bool TryOpenAssemblyStream(string name, [NotNullWhen(true)] out Stream? asm, out Stream? pdb)
+    public bool TryOpenAssemblyStream(string name, [NotNullWhen(true)] out Stream? asm, out Stream? pdb)
     {
         asm = null;
         pdb = null;
@@ -146,6 +181,8 @@ internal class Program
             Console.WriteLine("Usage: SS14.Loader <robustPath> <signature> <public key> [engineArg [engineArg...]]");
             return 1;
         }
+
+        Console.WriteLine($"Starting loader");
 
         var robustPath = args[0];
         var sig = Convert.FromHexString(args[1]);
@@ -181,7 +218,6 @@ internal class Program
             return 3;
         }
 
-        /*Console.WriteLine("lsasm dump:");
         foreach (var asmLoadContext in AssemblyLoadContext.All)
         {
             Console.WriteLine("{0}:", asmLoadContext.Name);
@@ -189,7 +225,7 @@ internal class Program
             {
                 Console.WriteLine("  {0}", asm.GetName().Name);
             }
-        }*/
+        }
 
         return 0;
     }
