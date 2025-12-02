@@ -31,4 +31,9 @@ public static class SanabiCVars
     ///         spoofed fingerprints to servers.
     /// </summary>
     public static readonly CVarDef<bool> SpoofFingerprintOnLogin = CVarDef.Create("SpoofFingerprintOnLogin", true);
+
+    /// <summary>
+    ///     Allow sending HWID to server?
+    /// </summary>
+    public static readonly CVarDef<bool> AllowHwid = CVarDef.Create("AllowHwid", false);
 }

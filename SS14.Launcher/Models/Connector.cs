@@ -550,6 +550,9 @@ public partial class Connector : ReactiveObject
 
         EnvVar("SS14_LAUNCHER_PATH", Process.GetCurrentProcess().MainModule!.FileName);
 
+        if (!_cfg.GetCVar(SanabiCVars.AllowHwid))
+            startInfo.EnvironmentVariables["ROBUST_AUTH_ALLOW_HWID"] = "0";
+
         if (RuntimeInformation.IsOSPlatform(OSPlatform.OSX))
         {
             EnvVar("SS14_LOG_CLIENT", LauncherPaths.PathClientMacLog);

@@ -75,6 +75,7 @@ public class OptionsTabViewModel : MainWindowTabViewModel
         }
     }
 
+    #region Sanabi
     public bool PassFingerprint
     {
         get => Cfg.GetCVar(SanabiCVars.PassFingerprint);
@@ -104,6 +105,17 @@ public class OptionsTabViewModel : MainWindowTabViewModel
             Cfg.CommitConfig();
         }
     }
+
+    public bool AllowHwid
+    {
+        get => Cfg.GetCVar(SanabiCVars.AllowHwid);
+        set
+        {
+            Cfg.SetCVar(SanabiCVars.AllowHwid, value);
+            Cfg.CommitConfig();
+        }
+    }
+    #endregion
 
     public void ClearEngines()
     {
