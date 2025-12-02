@@ -69,15 +69,22 @@ internal class Program
         AssemblyManager.Assemblies["Robust.Client"] = clientAssembly;
         AssemblyManager.Assemblies["Robust.Shared"] = sharedEngineAssembly;
 
+        var contentRunLevelAct = () =>
+        {
+            PatchEntryAttributeManager.ProcessRunLevel(PatchRunLevel.Content);
+        };
+
         if (AssemblyManager.TryGetAssembly("Robust.Client", out _))
         {
             Console.WriteLine($"Harmony {(HarmonyManager.Harmony == null ? "is broken" : "exists")}");
+            HarmonyManager.Initialise();
             HarmonyManager.BypassAnticheat();
 
             var modloader = ReflectionManager.GetTypeByQualifiedName("Robust.Shared.ContentPack.ModLoader");
             PatchHelpers.PatchPrefixFalse(modloader.GetMethod("SetUseLoadContext")!);
 
-            AssemblyLoadPatch.Patch();
+            PatchEntryAttributeManager.ProcessRunLevel(PatchRunLevel.Engine);
+            AssemblyManager.OnAssembliesFulfilled += contentRunLevelAct;
 
             AssemblyManager.QueryAssemblies();
             AssemblyManager.Subscribe();
@@ -116,7 +123,9 @@ internal class Program
         finally
         {
             contentApi?.Dispose();
+
             AssemblyManager.Unsubscribe();
+            AssemblyManager.OnAssembliesFulfilled -= contentRunLevelAct;
         }
         return true;
     }

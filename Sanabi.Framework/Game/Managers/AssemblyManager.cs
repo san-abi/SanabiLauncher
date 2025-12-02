@@ -33,7 +33,9 @@ public static class AssemblyManager
     ///     Called once when every necessary assembly has
     ///         been resolved.
     /// </summary>
-    public static readonly Action? OnAssembliesFulfilled;
+#pragma warning disable CA2211 // Non-constant fields should not be visible
+    public static Action? OnAssembliesFulfilled;
+#pragma warning restore CA2211
 
     /// <summary>
     ///     Tries to retrieve an assembly from cache.

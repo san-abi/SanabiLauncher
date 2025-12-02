@@ -13,6 +13,7 @@ namespace Sanabi.Framework.Game.Patches;
 /// </summary>
 public static class AssemblyLoadPatch
 {
+    [PatchEntry(PatchRunLevel.Engine)]
     public static void Patch()
     {
         PatchHelpers.PatchMethod(

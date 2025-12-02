@@ -50,7 +50,6 @@ public static class HarmonyManager
     */
     public static void BypassAnticheat()
     {
-        Initialise();
         PatchHelpers.PatchPrefixFalse(ReflectionManager.GetTypeByQualifiedName("Robust.Client.GameController").TypeInitializer!);
     }
 }

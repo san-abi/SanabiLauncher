@@ -6,7 +6,6 @@
         <IsPackable>false</IsPackable>
         <Nullable>enable</Nullable>
         <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
-        <TargetFramework>net9.0</TargetFramework>
     </PropertyGroup>
 
     <ItemGroup>
