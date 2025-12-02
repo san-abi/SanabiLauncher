@@ -83,6 +83,10 @@ internal class Program
 
         HarmonyManager.Initialise();
 
+        AssemblyHidingManager.Initialise();
+        AssemblyHidingManager.HideBasicAssemblies();
+        AssemblyHidingManager.PatchDetectionVectors();
+
         if (sanabiConfig.PatchRunLevel.HasFlag(PatchRunLevel.Engine) &&
             AssemblyManager.TryGetAssembly("Robust.Client", out _))
         {

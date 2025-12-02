@@ -131,4 +131,19 @@ public static partial class PatchHelpers
         var targetMethod = ResolveMethod(targetClass, targetMethodName, targetMethodParameters);
         TryPatchMethod(targetMethod, patchDelegate.Method, patchType);
     }
+
+    public static void PatchMethod(
+        MethodInfo? targetMethod,
+        MethodInfo? patchMethod,
+        HarmonyPatchType patchType)
+    {
+        TryPatchMethod(targetMethod, patchMethod, patchType);
+    }
+
+    /// <summary>
+    ///     Returns the <see cref="MethodInfo"/> of the given
+    ///         <see cref="Delegate"/>.
+    /// </summary>
+    public static MethodInfo GetMethod(Delegate @delegate)
+        => @delegate.Method;
 }
