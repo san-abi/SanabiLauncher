@@ -79,7 +79,7 @@ public static class AssemblyLoadingManager
     /// </summary>
     public static MethodInfo? GetModAssemblyEntryPoint(Assembly assembly)
     {
-        var entryPointType = assembly.GetType("EntryPoint") ?? assembly.GetType("MarseyEntry");
+        var entryPointType = assembly.GetType("PatchEntry") ?? assembly.GetType("MarseyEntry") ?? assembly.GetType("EntryPoint");
         return entryPointType?.GetMethod("Entry", BindingFlags.Static | BindingFlags.NonPublic | BindingFlags.Public);
     }
 
