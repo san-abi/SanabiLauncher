@@ -16,7 +16,6 @@ public static class AssemblyHidingManager
     ///     Assemblies hidden from view.
     /// </summary>
     private static List<Assembly> _hiddenAssemblies = new();
-    private static List<Type> _hiddenTypes = new();
 
     public static void Initialise()
     {
@@ -53,8 +52,6 @@ public static class AssemblyHidingManager
     public static void HideAssembly(Assembly assembly)
     {
         _hiddenAssemblies.Add(assembly);
-        foreach (var type in assembly.GetTypes())
-            _hiddenTypes.Add(type);
     }
 
     public static void PatchDetectionVectors()
@@ -91,8 +88,16 @@ public static class AssemblyHidingManager
         return [.. names.Where(assemblyName => !hiddenNames.Contains(assemblyName))];
     }
 
-    private static Type[] HideHiddenTypes(Type[] unhiddenTypes)
-        => [.. unhiddenTypes.Except(_hiddenTypes)];
+    private static IEnumerable<Type> HideHiddenTypes(Type[] unhiddenTypes)
+    {
+        foreach (var type in unhiddenTypes)
+        {
+            if (_hiddenAssemblies.Contains(type.Assembly))
+                continue;
+
+            yield return type;
+        }
+    }
 
     private static void DetectionVectorPatcher(ref object __result)
     {
@@ -105,14 +110,14 @@ public static class AssemblyHidingManager
             case Assembly[] originalAssemblies:
                 __result = originalAssemblies.Where(assembly => !_hiddenAssemblies.Contains(assembly)).ToArray();
                 break;
+            case Type[] types:
+                __result = HideHiddenTypes(types).ToArray();
+                break;
             case IEnumerable<Assembly> assemblyEnumerable:
                 __result = assemblyEnumerable.Where(assembly => !_hiddenAssemblies.Contains(assembly));
                 break;
             case IEnumerable<AssemblyLoadContext> assemblyLoadContextEnumerable:
                 __result = assemblyLoadContextEnumerable.Where(context => context.Name != "Assembly.Load(byte[], ...)");
-                break;
-            case Type[] types:
-                __result = HideHiddenTypes(types);
                 break;
             default:
                 throw new InvalidOperationException($"Bad type: {__result.GetType()}");
