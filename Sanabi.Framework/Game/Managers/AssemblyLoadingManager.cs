@@ -51,12 +51,13 @@ public static class AssemblyLoadingManager
 
     /// <summary>
     ///     Tries to get the entry point for a mod assembly.
-    ///         Compatible with Marsey patches.
+    ///         This is only done so that we are compatible with Marsey
+    ///         patches; ideally we use <see cref="PatchEntryAttribute"/>.
     /// </summary>
     /// <param name="assembly"></param>
     public static MethodInfo? GetModAssemblyEntryPoint(Assembly assembly)
     {
-        var entryPointType = assembly.GetType("MarseyEntry") ?? assembly.GetType("ModEntry");
+        var entryPointType = assembly.GetType("MarseyEntry");
         return entryPointType?.GetMethod("Entry", BindingFlags.Static | BindingFlags.Public);
     }
 
@@ -67,7 +68,7 @@ public static class AssemblyLoadingManager
     }
 
     /// <summary>
-    ///     Ports MarseyLogger to work with a modd assembly patch;
+    ///     Ports MarseyLogger to work with a mod assembly patch;
     ///         i.e. makes it print here.
     /// </summary>
     /// <param name="assembly">The mod assembly.</param>

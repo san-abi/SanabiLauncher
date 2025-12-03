@@ -24,16 +24,15 @@ public static class AssemblyLoadPatch
         );
     }
 
-    private static bool Prefix(Assembly assembly)
+    private static void Prefix(Assembly assembly)
     {
-        Console.WriteLine($"Trying to intercept assembly...");
         // If it doesn't have a fullname then we probably don't care whatever.
         if (assembly.FullName is not { } fullName)
-            return true;
+            return;
 
         Console.WriteLine($"Intercepted assembly: {fullName}");
-        AssemblyManager.Assemblies[fullName] = assembly;
+        AssemblyManager.Assemblies[assembly.GetName().Name ?? fullName] = assembly;
 
-        return true;
+        return;
     }
 }

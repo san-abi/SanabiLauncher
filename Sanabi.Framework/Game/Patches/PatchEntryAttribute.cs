@@ -1,8 +1,12 @@
 namespace Sanabi.Framework.Game.Patches;
 
 /// <summary>
-///     Attribute put on methods that run on the game process
+///     Attribute put only on static methods, to be invoked on the game process
 ///         on different RunLevels.
+///
+///     Methods must either have no arguments, or have their only
+///         argument be a `Dictionary<string, Assembly?>`. When invoked,
+///         this dictionary will be <see cref="Managers.AssemblyManager.Assemblies"/>.
 /// </summary>
 [AttributeUsage(AttributeTargets.Method)]
 public class PatchEntryAttribute(PatchRunLevel RunLevel) : Attribute
