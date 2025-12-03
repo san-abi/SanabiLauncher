@@ -15,10 +15,10 @@ public static class PatchEntryAttributeManager
     ///     Applicable methods with exactly 1 argument will be given a
     ///         dictionary of every assembly known by <see cref="AssemblyManager"/>.
     /// </summary>
-    public static void ProcessRunLevel(PatchRunLevel runLevel)
+    public static void ProcessRunLevel(PatchRunLevel runLevel, Assembly[]? targetAssemblies = null)
     {
         Console.WriteLine($"Running Patch RunLevel: {runLevel}");
-        foreach (var assembly in AppDomain.CurrentDomain.GetAssemblies())
+        foreach (var assembly in targetAssemblies ?? AppDomain.CurrentDomain.GetAssemblies())
         {
             foreach (var type in assembly.GetTypes())
             {

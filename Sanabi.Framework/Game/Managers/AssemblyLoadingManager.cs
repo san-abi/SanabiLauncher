@@ -86,15 +86,14 @@ public static class AssemblyLoadingManager
 
     private static void LoadModAssembly(ref dynamic modLoader, Assembly modAssembly)
     {
-        var modEntry = GetModAssemblyEntryPoint(modAssembly);
-        if (modEntry == null)
-            return;
-
-        PortModMarseyLogger(modAssembly);
-
         AssemblyHidingManager.HideAssembly(modAssembly);
         _modInitMethod.Invoke(modLoader, (Assembly[])[modAssembly]);
 
-        _ = Task.Run(() => modEntry.Invoke(null, []));
+        var modEntry = GetModAssemblyEntryPoint(modAssembly);
+        if (modEntry != null)
+        {
+            PortModMarseyLogger(modAssembly);
+            _ = Task.Run(() => modEntry.Invoke(null, []));
+        }
     }
 }
