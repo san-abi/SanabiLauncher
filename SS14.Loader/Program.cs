@@ -76,6 +76,7 @@ internal class Program
         //var sanabiConfig = new SanabiConfig();
         Console.WriteLine($"Received sanabiconfig, runlevel @ {processSanabiConfig.PatchRunLevel}");
         Console.WriteLine($"Received sanabiconfig, hwid @ {processSanabiConfig.RunHwidPatch}");
+        Console.WriteLine($"Received sanabiconfig, internal mods @ {processSanabiConfig.LoadInternalMods}");
         Console.WriteLine($"Received sanabiconfig, external mods @ {processSanabiConfig.LoadExternalMods}");
 
         var contentRunLevelAct = () =>
