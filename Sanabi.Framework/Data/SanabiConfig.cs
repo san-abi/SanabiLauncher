@@ -12,5 +12,9 @@ namespace Sanabi.Framework.Data;
 [StructLayout(LayoutKind.Sequential, Pack = 1)]
 public record struct SanabiConfig()
 {
-    public PatchRunLevel PatchRunLevel = PatchRunLevel.Full;
+    public static SanabiConfig ProcessConfig = new();
+
+    public PatchRunLevel PatchRunLevel = PatchRunLevel.None;
+
+    public bool RunHwidPatch = true;
 }

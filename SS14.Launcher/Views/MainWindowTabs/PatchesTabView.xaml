@@ -29,7 +29,7 @@
                   Content="Enable patching"/>
         <TextBlock VerticalAlignment="Center"
                    TextWrapping="Wrap"
-                   Text="Enable any kind of patching?"
+                   Text="Enable any kind of patching? Inherently enables engine patching."
                    Margin="8"/>
 
         <CheckBox VerticalAlignment="Center"
@@ -47,7 +47,7 @@
                   Content="Enable HWID spoofing patch"/>
         <TextBlock VerticalAlignment="Center"
                    TextWrapping="Wrap"
-                   Text="Patches out HWID to be spoofed when connecting to a server. Only applies if patching is enabled."
+                   Text="Patches out HWID to be spoofed when connecting to a server. Only applies if engine patching is enabled."
                    Margin="8"/>
       </StackPanel>
     </DockPanel>

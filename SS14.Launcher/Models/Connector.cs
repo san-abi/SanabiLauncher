@@ -597,6 +597,8 @@ public partial class Connector : ReactiveObject
         config.PatchRunLevel = _cfg.GetCVar(SanabiCVars.PatchingEnabled) ?
             (_cfg.GetCVar(SanabiCVars.PatchingLevel) ? PatchRunLevel.Full : PatchRunLevel.Engine) :
             PatchRunLevel.None;
+        config.RunHwidPatch = _cfg.GetCVar(SanabiCVars.HwidPatchEnabled);
+
         _ = IpcManager.RunStructPipeServer(IpcManager.SanabiIpcName, config);
 
         var process = Process.Start(startInfo);

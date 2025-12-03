@@ -1,4 +1,6 @@
+using System.Diagnostics;
 using System.Reflection;
+using System.Runtime.CompilerServices;
 using System.Runtime.Loader;
 using HarmonyLib;
 using Sanabi.Framework.Misc.Net;
@@ -15,7 +17,7 @@ public static class AssemblyHidingManager
     /// <summary>
     ///     Assemblies hidden from view.
     /// </summary>
-    private static List<Assembly> _hiddenAssemblies = new();
+    private static readonly List<Assembly> _hiddenAssemblies = new();
 
     public static void Initialise()
     {
@@ -24,8 +26,8 @@ public static class AssemblyHidingManager
 
     public static void HideBasicAssemblies()
     {
-        HideAssembly("Harmony", once: false);
-        HideAssembly("Sanabi", once: false);
+        HideAssembly("Harmony", once: true);
+        HideAssembly("Sanabi", once: true);
     }
 
     /// <summary>
@@ -43,6 +45,8 @@ public static class AssemblyHidingManager
                 continue;
 
             HideAssembly(assembly);
+            if (once)
+                break;
         }
     }
 
@@ -99,8 +103,13 @@ public static class AssemblyHidingManager
         }
     }
 
+    [MethodImpl(MethodImplOptions.NoInlining)]
     private static void DetectionVectorPatcher(ref object __result)
     {
+        // If called from framework or whatever then let it actually use the function
+        if (IsCallsiteInHiddenAssembly())
+            return;
+
         // i hate ts
         switch (__result)
         {
@@ -122,5 +131,25 @@ public static class AssemblyHidingManager
             default:
                 throw new InvalidOperationException($"Bad type: {__result.GetType()}");
         }
+    }
+
+    /// <returns>Whether the call-site of this method is in a currently hidden assembly.</returns>
+    public static bool IsCallsiteInHiddenAssembly()
+    {
+        var stackTrace = new StackTrace();
+        var frames = stackTrace.GetFrames();
+
+        foreach (var frame in frames)
+        {
+            var method = frame.GetMethod();
+            if (method == null ||
+                method.DeclaringType == null)
+                continue;
+
+            if (_hiddenAssemblies.Contains(method.DeclaringType.Assembly))
+                return true;
+        }
+
+        return false;
     }
 }

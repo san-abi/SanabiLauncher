@@ -71,13 +71,15 @@ internal class Program
 
         // wait until properly connected
 
-        var sanabiConfig = IpcManager.RunStructPipeClient<SanabiConfig>(IpcManager.SanabiIpcName);
+        ref var processSanabiConfig = ref SanabiConfig.ProcessConfig;
+        processSanabiConfig = IpcManager.RunStructPipeClient<SanabiConfig>(IpcManager.SanabiIpcName);
         //var sanabiConfig = new SanabiConfig();
-        Console.WriteLine($"Received sanabiconfig, runlevel @ {sanabiConfig.PatchRunLevel}");
+        Console.WriteLine($"Received sanabiconfig, runlevel @ {processSanabiConfig.PatchRunLevel}");
+        Console.WriteLine($"Received sanabiconfig, hwid @ {processSanabiConfig.RunHwidPatch}");
 
         var contentRunLevelAct = () =>
         {
-            if (sanabiConfig.PatchRunLevel.HasFlag(PatchRunLevel.Content))
+            if (SanabiConfig.ProcessConfig.PatchRunLevel.HasFlag(PatchRunLevel.Content))
                 PatchEntryAttributeManager.ProcessRunLevel(PatchRunLevel.Content);
         };
 
@@ -87,7 +89,7 @@ internal class Program
         AssemblyHidingManager.HideBasicAssemblies();
         AssemblyHidingManager.PatchDetectionVectors();
 
-        if (sanabiConfig.PatchRunLevel.HasFlag(PatchRunLevel.Engine) &&
+        if (processSanabiConfig.PatchRunLevel.HasFlag(PatchRunLevel.Engine) &&
             AssemblyManager.TryGetAssembly("Robust.Client", out _))
         {
             Console.WriteLine($"Harmony {(HarmonyManager.Harmony == null ? "is broken" : "exists")}");
@@ -107,15 +109,15 @@ internal class Program
             Console.WriteLine("Deemed dangerous to bypass");
         }
 
-        Console.WriteLine("lsasm dump:");
-        foreach (var asmLoadContext in AssemblyLoadContext.All)
-        {
-            Console.WriteLine("{0}:", asmLoadContext.Name);
-            foreach (var Asm in asmLoadContext.Assemblies)
-            {
-                Console.WriteLine("  {0}", Asm.GetName().Name);
-            }
-        }
+        // Console.WriteLine("lsasm dump:");
+        // foreach (var asmLoadContext in AssemblyLoadContext.All)
+        // {
+        //     Console.WriteLine("{0}:", asmLoadContext.Name);
+        //     foreach (var Asm in asmLoadContext.Assemblies)
+        //     {
+        //         Console.WriteLine("  {0}", Asm.GetName().Name);
+        //     }
+        // }
 
 #if USE_SYSTEM_SQLITE
         SQLitePCL.raw.SetProvider(new SQLitePCL.SQLite3Provider_sqlite3());

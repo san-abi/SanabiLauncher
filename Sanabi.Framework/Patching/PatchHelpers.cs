@@ -1,4 +1,5 @@
 using System.Reflection;
+using System.Runtime.CompilerServices;
 using HarmonyLib;
 using Sanabi.Framework.Game.Managers;
 
@@ -22,15 +23,24 @@ public static partial class PatchHelpers
     public static void PatchPrefixFalse(MethodBase method)
         => HarmonyManager.Harmony.Patch(method, prefix: new HarmonyMethod(FalsePrefix));
 
-    private static bool FalsePrefix()
+    internal static bool FalsePrefix()
     {
-        Console.WriteLine($"This function was patched, assembly.");
         return false;
     }
 
-    public static MethodInfo? GetMethod(Type? type, string MethodName, Type[]? parameters = null)
+    [MethodImpl(MethodImplOptions.NoInlining)]
+    public static MethodInfo? GetMethod(Type? type, string methodName, Type[]? parameters = null)
     {
-        return AccessTools.Method(type, MethodName, parameters);
+        return AccessTools.Method(type, methodName, parameters);
+    }
+
+    /// <summary>
+    ///     Tries to retrieve the constant value of a static field from the given type.
+    /// </summary>
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
+    public static object? GetConstantFieldValue(Type? type, string fieldName)
+    {
+        return type?.GetField(fieldName, BindingFlags.Static | BindingFlags.NonPublic | BindingFlags.Public)?.GetRawConstantValue();
     }
 
     /// <summary>
@@ -111,6 +121,27 @@ public static partial class PatchHelpers
     /// <summary>
     ///     Tries to patch a method by the names of the necessary
     ///         class and method. However, the patch method
+    ///         and target class are already defined.
+    /// </summary>
+    /// <param name="targetQualifiedTypeName">Fully qualified type-name of the target class.</param>
+    /// <param name="targetMethodName">Name of the target method.</param>
+    /// <param name="patchDelegate">The patch method.</param>
+    /// <param name="patchType">How the patch will be applied.</param>
+    /// <param name="targetMethodParameters">Parameters taken by the target method.</param>
+    public static void PatchMethod(
+        Type targetClass,
+        string targetMethodName,
+        Delegate patchDelegate,
+        HarmonyPatchType patchType,
+        Type[]? targetMethodParameters = null)
+    {
+        var targetMethod = ResolveMethod(targetClass, targetMethodName, targetMethodParameters);
+        TryPatchMethod(targetMethod, patchDelegate.Method, patchType);
+    }
+
+    /// <summary>
+    ///     Tries to patch a method by the names of the necessary
+    ///         class and method. However, the patch method
     ///         is already defined.
     /// </summary>
     /// <param name="targetQualifiedTypeName">Fully qualified type-name of the target class.</param>
@@ -128,8 +159,13 @@ public static partial class PatchHelpers
         if (!ReflectionManager.TryGetTypeByQualifiedName(targetQualifiedTypeName, out var targetClass))
             return;
 
-        var targetMethod = ResolveMethod(targetClass, targetMethodName, targetMethodParameters);
-        TryPatchMethod(targetMethod, patchDelegate.Method, patchType);
+        PatchMethod(
+            targetClass,
+            targetMethodName,
+            patchDelegate,
+            patchType,
+            targetMethodParameters: targetMethodParameters
+        );
     }
 
     public static void PatchMethod(
