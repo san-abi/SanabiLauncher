@@ -93,7 +93,6 @@ internal class Program
         if (processSanabiConfig.PatchRunLevel.HasFlag(PatchRunLevel.Engine) &&
             AssemblyManager.TryGetAssembly("Robust.Client", out _))
         {
-            Console.WriteLine($"Harmony {(HarmonyManager.Harmony == null ? "is broken" : "exists")}");
             HarmonyManager.BypassAnticheat();
 
             var modloader = ReflectionManager.GetTypeByQualifiedName("Robust.Shared.ContentPack.ModLoader");
@@ -106,15 +105,15 @@ internal class Program
             AssemblyManager.Subscribe();
         }
 
-        Console.WriteLine("lsasm dump:");
-        foreach (var asmLoadContext in AssemblyLoadContext.All)
-        {
-            Console.WriteLine("{0}:", asmLoadContext.Name);
-            foreach (var Asm in asmLoadContext.Assemblies)
-            {
-                Console.WriteLine("  {0}", Asm.GetName().Name);
-            }
-        }
+        // Console.WriteLine("lsasm dump:");
+        // foreach (var asmLoadContext in AssemblyLoadContext.All)
+        // {
+        //     Console.WriteLine("{0}:", asmLoadContext.Name);
+        //     foreach (var Asm in asmLoadContext.Assemblies)
+        //     {
+        //         Console.WriteLine("  {0}", Asm.GetName().Name);
+        //     }
+        // }
 
 #if USE_SYSTEM_SQLITE
         SQLitePCL.raw.SetProvider(new SQLitePCL.SQLite3Provider_sqlite3());

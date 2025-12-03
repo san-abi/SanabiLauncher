@@ -17,16 +17,11 @@ public static class IpcManager
     /// </summary>
     public static async Task RunStructPipeServer<TDatum>(string pipeName, TDatum transferredStruct) where TDatum : unmanaged
     {
-        Console.WriteLine($"Starting server...");
         var server = InitiateServer(pipeName, pipeDirection: PipeDirection.Out);
         await server.WaitForConnectionAsync();
 
-        Console.WriteLine($"Started server");
-
         var data = StructToMemory(ref transferredStruct);
         await server.WriteAsync(data);
-
-        Console.WriteLine($"Wrote client");
 
         server.Disconnect();
         server.Dispose();
@@ -38,11 +33,8 @@ public static class IpcManager
     /// </summary>
     public static TDatum RunStructPipeClient<TDatum>(string pipeName) where TDatum : unmanaged
     {
-        Console.WriteLine($"Starting client...");
         var client = InitiateClient(pipeName, pipeDirection: PipeDirection.In);
         client.Connect();
-
-        Console.WriteLine($"Started client");
 
         var buffer = new byte[Unsafe.SizeOf<TDatum>()];
         var offset = 0;
@@ -51,10 +43,7 @@ public static class IpcManager
         {
             var bytesRead = client.Read(buffer, offset, buffer.Length - offset);
             if (bytesRead == 0)
-            {
-                Console.WriteLine("Server disconnected");
                 throw new InvalidOperationException("Server was disconnected while reading.");
-            }
 
             offset += bytesRead;
         }
@@ -70,11 +59,9 @@ public static class IpcManager
     /// <param name="onLineReceived">Invoked with the read line every time a line is read from the pipe, from the server.</param>
     public static async Task<NamedPipeServerStream> RunPipeServer(string pipeName, Action<string> sendAction, Action<string>? onLineReceived = null)
     {
-        Console.WriteLine($"Starting server...");
         var server = InitiateServer(pipeName);
         await server.WaitForConnectionAsync();
         InitialiseStreams(server, out var serverReader, out var serverWriter);
-        Console.WriteLine($"Started server");
 
         sendAction = line => _ = serverWriter.WriteLineAsync(line);
         _ = Task.Run(async () => StartListening(serverReader, sendAction, onLineReceived));
@@ -89,12 +76,9 @@ public static class IpcManager
     /// <param name="onLineReceived">Invoked with the read line every time a line is read from the pipe, from the server.</param>
     public static async Task<NamedPipeClientStream> RunPipeClient(string pipeName, Action<string> sendAction, Action<string>? onLineReceived = null)
     {
-        Console.WriteLine($"Starting client...");
         var client = InitiateClient(pipeName);
         await client.ConnectAsync();
         InitialiseStreams(client, out var clientReader, out var clientWriter);
-
-        Console.WriteLine($"Started client");
 
         sendAction = line => _ = clientWriter.WriteLineAsync(line);
         _ = Task.Run(async () => StartListening(clientReader, sendAction, onLineReceived));
@@ -110,12 +94,10 @@ public static class IpcManager
             if (line == null) break; // other side disconnected
 
             onLineReceived?.Invoke(line);
-            Console.WriteLine("Pipe says: " + line);
         }
 
         // Pipe closed, disable the action
         sendAction = _ => { };
-        Console.WriteLine("Pipe closed. Send action disabled.");
     }
 
     /// <summary>

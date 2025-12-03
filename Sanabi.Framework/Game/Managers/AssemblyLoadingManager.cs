@@ -80,10 +80,9 @@ public static class AssemblyLoadingManager
     public static MethodInfo? GetModAssemblyEntryPoint(Assembly assembly)
     {
         var entryPointType = assembly.GetType("EntryPoint") ?? assembly.GetType("MarseyEntry");
-        return entryPointType?.GetMethod("Entry", BindingFlags.Static | BindingFlags.Public);
+        return entryPointType?.GetMethod("Entry", BindingFlags.Static | BindingFlags.NonPublic | BindingFlags.Public);
     }
 
-    private delegate void Forward(AssemblyName asm, string message);
     private static void LogDelegate(AssemblyName asm, string message)
     {
         SanabiLogger.LogInfo($"PRT-{asm.FullName}: {message}");
@@ -113,13 +112,7 @@ public static class AssemblyLoadingManager
 
         _modInitMethod.Invoke(modLoader, (Assembly[])[modAssembly]);
 
-        Console.WriteLine($"Loaded assembly: {modAssembly.FullName}");
-
         if (GetModAssemblyEntryPoint(modAssembly) is { } modEntry)
-        {
-            Console.WriteLine($"Entering mod assem: {modAssembly.FullName} and method: {modEntry.Name}");
             Enter(modEntry, async: true);
-            Console.WriteLine($"Entered mod assem: {modAssembly.FullName} and method: {modEntry.Name}");
-        }
     }
 }
