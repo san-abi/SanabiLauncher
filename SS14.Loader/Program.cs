@@ -84,15 +84,15 @@ internal class Program
                 PatchEntryAttributeManager.ProcessRunLevel(PatchRunLevel.Content);
         };
 
-        HarmonyManager.Initialise();
-
-        AssemblyHidingManager.Initialise();
-        AssemblyHidingManager.HideBasicAssemblies();
-        AssemblyHidingManager.PatchDetectionVectors();
-
         if (processSanabiConfig.PatchRunLevel.HasFlag(PatchRunLevel.Engine) &&
             AssemblyManager.TryGetAssembly("Robust.Client", out _))
         {
+            HarmonyManager.Initialise();
+
+            AssemblyHidingManager.Initialise();
+            AssemblyHidingManager.HideBasicAssemblies();
+            AssemblyHidingManager.PatchDetectionVectors();
+
             HarmonyManager.BypassAnticheat();
 
             var modloader = ReflectionManager.GetTypeByQualifiedName("Robust.Shared.ContentPack.ModLoader");
