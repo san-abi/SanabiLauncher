@@ -126,13 +126,17 @@ public static class AssemblyHidingManager
     private static void DetectionVectorPatcher(ref object __result)
     {
         // If called from framework or whatever then let it actually use the function
-        // I think this is actually a bit overkill so it's not used.
-        //if (IsCallsiteInHiddenAssembly())
-        //    return;
+        if (IsCallsiteInHiddenAssembly())
+            return;
 
         // Don't let content see
-        if (!IsCallsiteFromGame())
-            return;
+        /*
+            !! `IsCallsiteFromGame` isn't used here because it stops the game from actually initialising
+            any external mods. On the other hand `IsCallsiteInHiddenAssembly` is a bit overkill but it works here with less effort
+            than it would take to fix `IsCallsiteFromGame` not working with external mods.
+        */
+        // if (!IsCallsiteFromGame())
+        //     return;
 
         // i hate ts
         switch (__result)

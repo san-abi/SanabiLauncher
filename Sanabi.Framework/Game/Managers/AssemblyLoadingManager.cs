@@ -49,6 +49,7 @@ public static class AssemblyLoadingManager
 
         var baseModLoader = ReflectionManager.GetTypeByQualifiedName("Robust.Shared.ContentPack.BaseModLoader");
         _modInitMethod = PatchHelpers.GetMethod(baseModLoader, "InitMod")!;
+        PatchHelpers.PatchMethod(_modInitMethod, PatchHelpers.GetMethod(prefix), HarmonyPatchType.Prefix);
 
         var internalModLoader = ReflectionManager.GetTypeByQualifiedName("Robust.Shared.ContentPack.ModLoader");
 
@@ -65,6 +66,11 @@ public static class AssemblyLoadingManager
 
         foreach (var dll in externalDlls)
         { _assembliesPendingLoad.Push(Assembly.LoadFrom(dll)); Console.WriteLine($"Going to load assembly: {dll}"); }
+    }
+
+    private static void prefix(Assembly assembly)
+    {
+        Console.WriteLine($"PREFIX INITMOD ASSEMBLY: {assembly.FullName}");
     }
 
     private static void ModLoaderPostfix(ref dynamic __instance)
