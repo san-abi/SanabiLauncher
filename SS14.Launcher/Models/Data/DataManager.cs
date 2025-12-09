@@ -77,7 +77,7 @@ public sealed class DataManager : ReactiveObject
     public event Action? OnSpoofedFingerprintRegenerated;
 
     private bool _passSpoofedFingerprint = false;
-    private LoginManager _loginManager;
+    private LoginManager? _loginManager;
 
     static DataManager()
     {
@@ -88,9 +88,6 @@ public sealed class DataManager : ReactiveObject
 
     public DataManager()
     {
-        _loginManager = Locator.Current.GetRequiredService<LoginManager>();
-        _loginManager.OnActiveAccountChanged += OnActiveAccountChanged;
-
         Filters = new ServerFilterCollection(this);
         Hubs = new HubCollection(this);
         // Set up subscriptions to listen for when the list-data (e.g. logins) changes in any way.
@@ -118,6 +115,12 @@ public sealed class DataManager : ReactiveObject
         _engineInstallations.Connect()
             .ForEachChange(c => ChangeEngineInstallation(c.Reason, c.Current))
             .Subscribe();
+    }
+
+    public void SetLoginManager(LoginManager loginManager)
+    {
+        _loginManager = loginManager;
+        _loginManager.OnActiveAccountChanged += OnActiveAccountChanged;
     }
 
     private void OnActiveAccountChanged(LoggedInAccount? newlyActiveAccount)
@@ -492,7 +495,7 @@ public sealed class DataManager : ReactiveObject
     /// </summary>
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
     public T GetActiveAccountCVarOrDefault<T>(CVarDef<T> cVarDef)
-        => GetAccountCVarOrDefault(cVarDef, _loginManager.ActiveAccount?.UserId);
+        => GetAccountCVarOrDefault(cVarDef, _loginManager?.ActiveAccount?.UserId);
 
     /// <summary>
     ///     Gets a CVar entry linked to a <see cref="Guid"/>.
@@ -531,7 +534,7 @@ public sealed class DataManager : ReactiveObject
     /// </summary>
     public void TrySetActiveAccountCVar<T>(CVarDef<T> cVarDef, T value)
     {
-        if (_loginManager.ActiveAccount?.UserId is { } guid)
+        if (_loginManager?.ActiveAccount?.UserId is { } guid)
             SetAccountCVar(cVarDef, guid, value);
     }
 

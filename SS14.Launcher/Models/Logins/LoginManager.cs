@@ -113,6 +113,8 @@ public sealed class LoginManager : ReactiveObject
     public LoginManager(DataManager cfg, AuthApi authApi)
     {
         _dataManager = cfg;
+        _dataManager.SetLoginManager(this);
+
         _authApi = authApi;
 
         _logins = _dataManager.Logins
