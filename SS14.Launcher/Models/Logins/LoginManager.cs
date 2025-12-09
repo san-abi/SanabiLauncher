@@ -66,7 +66,7 @@ public sealed class LoginManager : ReactiveObject
         if (_dataManager.GetCVar(SanabiCVars.SpoofFingerprintOnLogin))
             _dataManager.RegenerateSpoofedFingerprint();
 
-        OnActiveAccountChanged?.Invoke();
+        OnActiveAccountChanged?.Invoke(ActiveAccount);
     }
 
     /// <summary>
@@ -91,7 +91,7 @@ public sealed class LoginManager : ReactiveObject
         ActiveAccount = loggedInAccount;
         this.RaisePropertyChanged(nameof(ActiveAccount));
 
-        OnActiveAccountChanged?.Invoke();
+        OnActiveAccountChanged?.Invoke(loggedInAccount);
     }
 
     /// <summary>
