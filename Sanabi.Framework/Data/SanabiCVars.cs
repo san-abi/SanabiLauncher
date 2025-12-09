@@ -33,7 +33,14 @@ public static partial class SanabiCVars
     public static readonly CVarDef<bool> SpoofFingerprintOnLogin = CVarDef.Create("SpoofFingerprintOnLogin", true);
 
     /// <summary>
-    ///     Allow sending HWID to server?
+    ///     Willingly (opt-in) send your (optionally spoofed) HWID to server?
     /// </summary>
     public static readonly CVarDef<bool> AllowHwid = CVarDef.Create("AllowHwid", false);
+
+    /// <summary>
+    ///     Seed to be used for generating HWID in <see cref="Sanabi.Framework.Game.Patches.HwidPatch"/>.
+    ///         This is an ulong value bit-interpreted as a long. This is done because DataManager SQLite
+    ///         is weird with ulong values.
+    /// </summary>
+    public static readonly CVarDef<long> SpoofedHwidSeed = CVarDef.Create("SpoofedHwidSeed", 1L);
 }

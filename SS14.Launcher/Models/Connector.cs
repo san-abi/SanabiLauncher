@@ -593,15 +593,7 @@ public partial class Connector : ReactiveObject
 
         Log.Debug("Launch command: {LaunchCommand}", commandBuilder.ToString());
 
-        var config = new SanabiConfig();
-        config.PatchRunLevel = _cfg.GetCVar(SanabiCVars.PatchingEnabled) ?
-            (_cfg.GetCVar(SanabiCVars.PatchingLevel) ? PatchRunLevel.Full : PatchRunLevel.Engine) :
-            PatchRunLevel.None;
-        config.RunHwidPatch = _cfg.GetCVar(SanabiCVars.HwidPatchEnabled);
-        config.LoadInternalMods = _cfg.GetCVar(SanabiCVars.LoadInternalMods);
-        config.LoadExternalMods = _cfg.GetCVar(SanabiCVars.LoadExternalMods);
-
-        _ = IpcManager.RunStructPipeServer(IpcManager.SanabiIpcName, config);
+        _ = IpcManager.RunStructPipeServer(IpcManager.SanabiIpcName, new SanabiConfig().Configure(_cfg));
 
         var process = Process.Start(startInfo);
 

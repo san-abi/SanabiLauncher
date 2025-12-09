@@ -71,13 +71,7 @@ internal class Program
 
         // wait until properly connected
 
-        ref var processSanabiConfig = ref SanabiConfig.ProcessConfig;
-        processSanabiConfig = IpcManager.RunStructPipeClient<SanabiConfig>(IpcManager.SanabiIpcName);
-        //var sanabiConfig = new SanabiConfig();
-        Console.WriteLine($"Received sanabiconfig, runlevel @ {processSanabiConfig.PatchRunLevel}");
-        Console.WriteLine($"Received sanabiconfig, hwid @ {processSanabiConfig.RunHwidPatch}");
-        Console.WriteLine($"Received sanabiconfig, internal mods @ {processSanabiConfig.LoadInternalMods}");
-        Console.WriteLine($"Received sanabiconfig, external mods @ {processSanabiConfig.LoadExternalMods}");
+        SanabiConfig.ProcessConfig = IpcManager.RunStructPipeClient<SanabiConfig>(IpcManager.SanabiIpcName);
 
         var contentRunLevelAct = () =>
         {
@@ -85,7 +79,7 @@ internal class Program
                 PatchEntryAttributeManager.ProcessRunLevel(PatchRunLevel.Content);
         };
 
-        if (processSanabiConfig.PatchRunLevel.HasFlag(PatchRunLevel.Engine) &&
+        if (SanabiConfig.ProcessConfig.PatchRunLevel.HasFlag(PatchRunLevel.Engine) &&
             AssemblyManager.TryGetAssembly("Robust.Client", out _))
         {
             HarmonyManager.Initialise();

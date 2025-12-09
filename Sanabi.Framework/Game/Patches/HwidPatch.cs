@@ -2,12 +2,12 @@ using Sanabi.Framework.Game.Managers;
 using HarmonyLib;
 using Sanabi.Framework.Patching;
 using Sanabi.Framework.Data;
-using System.Security.Cryptography;
+using Sanabi.Framework.Misc;
 
 namespace Sanabi.Framework.Game.Patches;
 
 /// <summary>
-///     Intercepts HWId and spoofs it.
+///     Intercepts HWId read and spoofs it.
 /// </summary>
 public static class HwidPatch
 {
@@ -26,30 +26,25 @@ public static class HwidPatch
         var hwidByteLength = (int?)PatchHelpers.GetConstantFieldValue(hwidType, "LengthHwid") ?? 32;
 
         SpoofedHwid = new byte[hwidByteLength];
-        RandomNumberGenerator.Fill(SpoofedHwid);
+        new Pcg32(SanabiConfig.ProcessConfig.HwidPatchSeed).NextBytes(SpoofedHwid);
 
         PatchHelpers.PatchMethod(
             hwidType,
             "GetLegacy",
-            PrefixLegacy,
+            PrefixLegacyOrModern,
             HarmonyPatchType.Prefix
         );
 
         PatchHelpers.PatchMethod(
             hwidType,
             "GetModern",
-            PrefixModern,
+            PrefixLegacyOrModern,
             HarmonyPatchType.Prefix
         );
     }
 
-    private static bool PrefixLegacy(ref dynamic __instance, ref dynamic __result)
-    {
-        __result = SpoofedHwid;
-        return false;
-    }
-
-    private static bool PrefixModern(ref dynamic __instance, ref dynamic __result)
+    // Works for both legcay&modern hwid at time of writing
+    private static bool PrefixLegacyOrModern(ref dynamic __instance, ref dynamic __result)
     {
         __result = SpoofedHwid;
         return false;
