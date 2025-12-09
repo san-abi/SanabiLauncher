@@ -129,6 +129,7 @@ public sealed class DataManager : ReactiveObject
             return;
 
         AssignAccountCVars([newlyActiveAccount.UserId], typeof(SanabiAccountCVars), overwrite: false);
+        LoadCVarsFromSqlite(sqliteConnection: null);
     }
 
     /// <summary>
@@ -336,6 +337,42 @@ public sealed class DataManager : ReactiveObject
         OnSpoofedFingerprintRegenerated?.Invoke();
     }
 
+    /// <summary>
+    ///     Reloads CVars from the SQLite DB.
+    /// </summary>
+    public void LoadCVarsFromSqlite(SqliteConnection? sqliteConnection = null)
+    {
+        var shouldDispose = false;
+        if (sqliteConnection == null)
+        {
+            sqliteConnection = new SqliteConnection(GetCfgDbConnectionString());
+            sqliteConnection.Open();
+
+            shouldDispose = true;
+        }
+
+        var configRows = sqliteConnection.Query<(string, object)>("SELECT Key, Value FROM Config");
+        foreach (var (k, v) in configRows)
+        {
+            if (!_configEntries.TryGetValue(k, out var entry))
+                continue;
+
+            if (entry.Type == typeof(string))
+                Set((string?)v);
+            else if (entry.Type == typeof(bool))
+                Set((long)v != 0);
+            else if (entry.Type == typeof(int))
+                Set((int)(long)v);
+            else if (entry.Type == typeof(long))
+                Set((long)v);
+
+            void Set<T>(T value) => ((CVarEntry<T>)entry).ValueInternal = value;
+        }
+
+        if (shouldDispose)
+            sqliteConnection.Dispose();
+    }
+
     private void LoadSqliteConfig(SqliteConnection sqliteConnection)
     {
         // Load logins.
@@ -363,23 +400,7 @@ public sealed class DataManager : ReactiveObject
         _modules.AddRange(sqliteConnection.Query<InstalledEngineModule>("SELECT Name, Version FROM EngineModule"));
 
         // Load CVars.
-        var configRows = sqliteConnection.Query<(string, object)>("SELECT Key, Value FROM Config");
-        foreach (var (k, v) in configRows)
-        {
-            if (!_configEntries.TryGetValue(k, out var entry))
-                continue;
-
-            if (entry.Type == typeof(string))
-                Set((string?)v);
-            else if (entry.Type == typeof(bool))
-                Set((long)v != 0);
-            else if (entry.Type == typeof(int))
-                Set((int)(long)v);
-            else if (entry.Type == typeof(long))
-                Set((long)v);
-
-            void Set<T>(T value) => ((CVarEntry<T>)entry).ValueInternal = value;
-        }
+        LoadCVarsFromSqlite(sqliteConnection: sqliteConnection);
 
         _filters.UnionWith(sqliteConnection.Query<ServerFilter>("SELECT Category, Data FROM ServerFilter"));
         _hubs.AddRange(sqliteConnection.Query<Hub>("SELECT Address,Priority FROM Hub"));
@@ -485,8 +506,8 @@ public sealed class DataManager : ReactiveObject
     /// </summary>
     public T GetAccountCVarOrDefault<T>(CVarDef<T> cVarDef, Guid? guid)
         => guid == null ?
-            cVarDef.DefaultValue :
-            GetAccountCVarEntry(cVarDef, guid.Value).Value;
+        cVarDef.DefaultValue :
+        GetAccountCVarEntry(cVarDef, guid.Value).Value;
 
     /// <summary>
     ///     Gets the value of a <see cref="CVarDef{T}"/> linked to the <see cref="Guid"/>
@@ -502,9 +523,7 @@ public sealed class DataManager : ReactiveObject
     /// </summary>
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
     public ICVarEntry<T> GetAccountCVarEntry<T>(CVarDef<T> cVarDef, Guid guid)
-    {
-        return (CVarEntry<T>)_configEntries[GetAccountCVarIdentifier(cVarDef, guid)];
-    }
+        => (CVarEntry<T>)_configEntries[GetAccountCVarIdentifier(cVarDef, guid)];
 
     /// <summary>
     ///     Sets a CVar linked to a <see cref="Guid"/>.
@@ -667,7 +686,9 @@ public sealed class DataManager : ReactiveObject
 
     public void SetCVar<T>([ValueProvider("SS14.Launcher.Models.Data.CVars")] CVarDef<T> cVar, T value, string? dbKey = null)
     {
-        var entry = (CVarEntry<T>)_configEntries[cVar.Name];
+        dbKey ??= cVar.Name;
+        var entry = (CVarEntry<T>)_configEntries[dbKey];
+
         if (EqualityComparer<T>.Default.Equals(entry.ValueInternal, value))
             return;
 
@@ -678,7 +699,7 @@ public sealed class DataManager : ReactiveObject
             "INSERT OR REPLACE INTO Config VALUES (@Key, @Value)",
             new
             {
-                Key = dbKey ??= cVar.Name,
+                Key = dbKey,
                 Value = value
             }));
     }

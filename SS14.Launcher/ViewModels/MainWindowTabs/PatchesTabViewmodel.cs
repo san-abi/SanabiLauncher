@@ -39,10 +39,11 @@ public class PatchesTabViewModel : MainWindowTabViewModel
     /// </summary>
     public void RegenerateHwidSeed()
     {
-        var newUlValue = SanabiConfigExtensions.RegenerateHwidSeed();
+        var bytes = (Span<byte>)stackalloc byte[8];
+        new Random().NextBytes(bytes);
 
         // setting cvar is redundant here
-        SpoofedHwidSeedText = newUlValue.ToString();
+        SpoofedHwidSeedText = BitConverter.ToUInt64(bytes).ToString();
     }
 
     public override string Name => "Patches";

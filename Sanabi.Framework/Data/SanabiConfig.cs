@@ -48,15 +48,4 @@ public static class SanabiConfigExtensions
 
         return config;
     }
-
-    /// <summary>
-    ///     Generates a random ulong.
-    /// </summary>
-    public static ulong RegenerateHwidSeed()
-    {
-        var newUlValueBytes = (Span<byte>)stackalloc byte[8];
-        new Random().NextBytes(newUlValueBytes);
-
-        return BitConverter.ToUInt64(newUlValueBytes);
-    }
 }
