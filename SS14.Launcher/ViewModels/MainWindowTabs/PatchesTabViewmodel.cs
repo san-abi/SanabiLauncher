@@ -16,7 +16,6 @@ public class PatchesTabViewModel : MainWindowTabViewModel
     public PatchesTabViewModel()
     {
         Cfg = Locator.Current.GetRequiredService<DataManager>();
-        Console.WriteLine($"CR HWIDSEED: {Cfg.GetCVar(SanabiCVars.SpoofedHwidSeed)}");
     }
 
     private void SetAndCommitCvar<T>(CVarDef<T> cVarDef, T newValue)
