@@ -326,9 +326,9 @@ public partial class Connector : ReactiveObject
     {
         var cVars = new List<(string, string)>();
 
-        if (info != null && info.AuthInformation.Mode != AuthMode.Disabled && _loginManager.ActiveAccount != null)
+        if (info != null && info.AuthInformation.Mode != AuthMode.Disabled && _loginManager.ActiveAccount is { } account)
         {
-            var account = _loginManager.ActiveAccount;
+            await _loginManager.UpdateSingleAccountStatus(account);
 
             cVars.Add(("ROBUST_AUTH_TOKEN", account.LoginInfo.Token.Token));
             cVars.Add(("ROBUST_AUTH_USERID", account.LoginInfo.UserId.ToString()));

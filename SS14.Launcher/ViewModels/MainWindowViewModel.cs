@@ -270,7 +270,8 @@ public sealed class MainWindowViewModel : ViewModelBase, IErrorOverlayOwner
         switch (account.Status)
         {
             case AccountLoginStatus.Unsure:
-                TrySelectUnsureAccount(account);
+                // SCRISK_TrySelectUnsureAccount(account);
+                _loginMgr.SetActiveAccount(account); // Who cares
                 break;
 
             case AccountLoginStatus.Available:
@@ -284,7 +285,7 @@ public sealed class MainWindowViewModel : ViewModelBase, IErrorOverlayOwner
         }
     }
 
-    private async void TrySelectUnsureAccount(LoggedInAccount account)
+    private async void SCRISK_TrySelectUnsureAccount(LoggedInAccount account)
     {
         BusyTask = _loc.GetString("main-window-busy-checking-account-status");
         try
