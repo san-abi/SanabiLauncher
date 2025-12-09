@@ -38,6 +38,14 @@ public static partial class SanabiCVars
     public static readonly CVarDef<bool> AllowHwid = CVarDef.Create("AllowHwid", false);
 
     /// <summary>
+    ///     As the launcher starts logged-out: should it start on the login menu
+    ///         (where no external API has yet been queried) or on the homepage
+    ///         (where hub API is likely to be queried). Turning this on can help against detection
+    ///         if you know what you are doing.
+    /// </summary>
+    public static readonly CVarDef<bool> StartOnLoginMenu = CVarDef.Create("StartOnLoginMenu", false);
+
+    /// <summary>
     ///     Seed to be used for generating HWID in <see cref="Sanabi.Framework.Game.Patches.HwidPatch"/>.
     ///         This is an ulong value bit-interpreted as a long. This is done because DataManager SQLite
     ///         is weird with ulong values.

@@ -11,6 +11,7 @@ namespace SS14.Launcher.ViewModels;
 
 public class MainWindowLoginViewModel : ViewModelBase
 {
+    private readonly MainWindowViewModel _mainVm;
     private readonly DataManager _cfg;
     private readonly AuthApi _authApi;
     private readonly LoginManager _loginMgr;
@@ -28,11 +29,12 @@ public class MainWindowLoginViewModel : ViewModelBase
         }
     }
 
-    public MainWindowLoginViewModel()
+    public MainWindowLoginViewModel(MainWindowViewModel mainVm)
     {
         _cfg = Locator.Current.GetRequiredService<DataManager>();
         _authApi = Locator.Current.GetRequiredService<AuthApi>();
         _loginMgr = Locator.Current.GetRequiredService<LoginManager>();
+        _mainVm = mainVm;
 
         _screen = default!;
         SwitchToLogin();
@@ -80,5 +82,10 @@ public class MainWindowLoginViewModel : ViewModelBase
             UseShellExecute = true,
             FileName = LauncherPaths.DirLogs
         });
+    }
+
+    public void JustHideLoginMenu()
+    {
+        _mainVm.SetLoginMenuShowing(false);
     }
 }

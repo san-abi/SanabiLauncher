@@ -23,7 +23,8 @@ public sealed class LoginManager : ReactiveObject
     private readonly DataManager _cfg;
     private readonly AuthApi _authApi;
 
-    private Guid? _activeLoginId;
+    private Guid? _activeLoginId = null;
+    private LoggedInAccount? _activeAccount = null;
 
     private readonly IObservableCache<ActiveLoginData, Guid> _logins;
 
@@ -39,7 +40,13 @@ public sealed class LoginManager : ReactiveObject
     ///
     ///     Should not be set directly.
     /// </summary>
-    public LoggedInAccount? ActiveAccount { get => _activeLoginId == null ? null : _logins.Lookup(_activeLoginId.Value).Value; }
+    //public LoggedInAccount? ActiveAccount { get => _activeLoginId == null ? null : _logins.Lookup(_activeLoginId.Value).Value; }
+    public LoggedInAccount? ActiveAccount { get => _activeAccount; }
+
+    /// <summary>
+    ///     Raised when the active account is changed.
+    /// </summary>
+    public Action? OnActiveAccountChanged = null;
 
     /// <summary>
     ///     Sets a new account to be active in by it's ID, or logs out (if possible)
@@ -47,22 +54,40 @@ public sealed class LoginManager : ReactiveObject
     /// </summary>
     /// <param name="value">The account ID, if any.</param>
     /// <exception cref="ArgumentException">Thrown when setting a new active account, but there is no login data for it.</exception>
-    public void SetActiveAccountById(Guid? value)
+    public void SetActiveAccountById(Guid? newAccountId)
     {
-        if (value != null)
+        if (newAccountId != null)
         {
-            var lookup = _logins.Lookup(value.Value);
+            var lookup = _logins.Lookup(newAccountId.Value);
+            _activeAccount = lookup.Value;
 
             if (!lookup.HasValue)
                 throw new ArgumentException("We do not have a login with that ID.");
         }
+        else
+            _activeAccount = null;
 
-        this.RaiseAndSetIfChanged(ref _activeLoginId, value);
+        this.RaiseAndSetIfChanged(ref _activeLoginId, newAccountId);
         this.RaisePropertyChanged(nameof(ActiveAccount));
-        _cfg.SelectedLoginId = value;
+        _cfg.SelectedLoginId = newAccountId;
 
         if (_cfg.GetCVar(SanabiCVars.SpoofFingerprintOnLogin))
             _cfg.RegenerateSpoofedFingerprint();
+
+        OnActiveAccountChanged?.Invoke();
+    }
+
+    /// <summary>
+    ///     If setting a new existing active account, refreshes tokens first.
+    ///         Otherwise logs out.
+    /// </summary>
+    /// <inheritdoc cref="SetActiveAccountById(Guid?)"/>
+    public async Task TryRefreshTokensAndSetActiveAccountById(Guid? value)
+    {
+        if (value.HasValue)
+            await RefreshTokens(value.Value);
+
+        SetActiveAccountById(value);
     }
 
     /// <summary>
@@ -71,7 +96,26 @@ public sealed class LoginManager : ReactiveObject
     /// </summary>
     public void SetActiveAccount(LoggedInAccount? loggedInAccount)
     {
-        _activeLoginId = loggedInAccount?.UserId;
+        Log.Debug($"Set accaccount by data: {loggedInAccount?.Username}");
+        this.RaiseAndSetIfChanged(ref _activeLoginId, loggedInAccount?.UserId);
+        //_activeLoginId = loggedInAccount?.UserId;
+        _activeAccount = loggedInAccount;
+
+        OnActiveAccountChanged?.Invoke();
+    }
+
+    /// <summary>
+    ///     If setting a new existing active account, refreshes tokens first.
+    ///         Otherwise logs out.
+    /// </summary>
+    /// <inheritdoc cref="SetActiveAccount(LoggedInAccount?)"/>
+    public async Task TryRefreshTokensAndSetActiveAccount(LoggedInAccount? loggedInAccount)
+    {
+        if (loggedInAccount is { } &&
+            _logins.Lookup(loggedInAccount.UserId) is { } queriedActiveLoginData)
+            await RefreshTokens(queriedActiveLoginData.Value);
+
+        SetActiveAccount(loggedInAccount);
     }
 
     public IObservableCache<LoggedInAccount, Guid> Logins { get; }
@@ -97,7 +141,7 @@ public sealed class LoginManager : ReactiveObject
             .AsObservableCache();
     }
 
-    private async Task RefreshAllTokens()
+    public async Task RefreshAllTokens()
     {
         Log.Debug("Refreshing all tokens.");
 
@@ -136,6 +180,12 @@ public sealed class LoginManager : ReactiveObject
             }
         }));
     }
+
+    /// <summary>
+    ///     Refreshes token(s) for the specified account given it's login id.
+    /// </summary>
+    public async Task RefreshTokens(Guid loginId)
+        => await RefreshTokens(_logins.Lookup(loginId).Value);
 
     /// <summary>
     ///     Refreshes token(s) for the specified account.
@@ -191,6 +241,7 @@ public sealed class LoginManager : ReactiveObject
 
     private async Task UpdateSingleAccountStatus(ActiveLoginData data)
     {
+        Log.Warning($":!!!: AUTHAPI is being contacted with logininfo: {data.LoginInfo.Username}");
         if (data.LoginInfo.Token.ShouldRefresh())
         {
             Log.Debug("Refreshing token for {login}", data.LoginInfo);

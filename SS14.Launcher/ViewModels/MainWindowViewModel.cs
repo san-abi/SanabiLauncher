@@ -70,35 +70,33 @@ public sealed class MainWindowViewModel : ViewModelBase, IErrorOverlayOwner
         Tabs = tabs;
 
         AccountDropDown = new AccountDropDownViewModel(this);
-        LoginViewModel = new MainWindowLoginViewModel();
+        LoginViewModel = new MainWindowLoginViewModel(this);
 
-        this.WhenAnyValue(x => x._loginMgr.ActiveAccount)
-            .Subscribe(s =>
-            {
-                this.RaisePropertyChanged(nameof(Username));
-                this.RaisePropertyChanged(nameof(LoggedIn));
-            });
+        _loginMgr.OnActiveAccountChanged += () =>
+        {
+            this.RaisePropertyChanged(nameof(Username));
+            this.RaisePropertyChanged(nameof(ShowLoginMenu));
+        };
 
         _cfg.Logins.Connect()
             .Subscribe(_ => { this.RaisePropertyChanged(nameof(AccountDropDownVisible)); });
 
-        // If we leave the login view model (by an account getting selected)
-        // we reset it to login state
-        this.WhenAnyValue(x => x.LoggedIn)
-            .DistinctUntilChanged() // Only when change.
-            .Subscribe(x =>
-            {
-                if (x)
-                {
-                    // "Switch" to main window.
-                    RunSelectedOnTab();
-                }
-                else
-                {
-                    RunDeselectedOnTab();
-                    LoginViewModel.SwitchToLogin();
-                }
-            });
+        SetLoginMenuShowing(_cfg.GetCVar(SanabiCVars.StartOnLoginMenu));
+    }
+
+    public void SetLoginMenuShowing(bool value)
+    {
+        ShowLoginMenu = value;
+        this.RaisePropertyChanged(nameof(ShowLoginMenu));
+
+        if (value)
+        {
+            RunDeselectedOnTab();
+            LoginViewModel.SwitchToLogin();
+        }
+        else
+            // "Switch" to main window.
+            RunSelectedOnTab();
     }
 
     public MainWindow? Control { get; set; }
@@ -112,6 +110,7 @@ public sealed class MainWindowViewModel : ViewModelBase, IErrorOverlayOwner
         set => this.RaiseAndSetIfChanged(ref _transitioningImagesVisible, value);
     }
 
+    [Reactive] public bool ShowLoginMenu { get; set; }
     public bool LoggedIn => _loginMgr.ActiveAccount != null;
     private string? Username => _loginMgr.ActiveAccount?.Username;
     public bool AccountDropDownVisible => _loginMgr.Logins.Count != 0;
@@ -167,11 +166,6 @@ public sealed class MainWindowViewModel : ViewModelBase, IErrorOverlayOwner
         BusyTask = _loc.GetString("main-window-busy-checking-update");
         await CheckLauncherUpdate();
         BusyTask = null;
-
-        if (_cfg.SelectedLoginId is { } g && _loginMgr.Logins.TryLookup(g, out var login))
-        {
-            TrySwitchToAccount(login);
-        }
 
         // We should now start reacting to commands.
     }
@@ -244,6 +238,7 @@ public sealed class MainWindowViewModel : ViewModelBase, IErrorOverlayOwner
 
     public void TrySwitchToAccount(LoggedInAccount account)
     {
+        Log.Debug($"{account.Status} ACCSTAT");
         switch (account.Status)
         {
             case AccountLoginStatus.Unsure:
@@ -251,7 +246,7 @@ public sealed class MainWindowViewModel : ViewModelBase, IErrorOverlayOwner
                 break;
 
             case AccountLoginStatus.Available:
-                _loginMgr.SetActiveAccount(account);
+                _ = _loginMgr.TryRefreshTokensAndSetActiveAccount(account);
                 break;
 
             case AccountLoginStatus.Expired:

@@ -36,15 +36,14 @@ public class AccountDropDownViewModel : ViewModelBase
         _loginMgr = Locator.Current.GetRequiredService<LoginManager>();
         _loc = LocalizationManager.Instance;
 
-        this.WhenAnyValue(x => x._loginMgr.ActiveAccount)
-            .Subscribe(_ =>
-            {
-                this.RaisePropertyChanged(nameof(LoginText));
-                this.RaisePropertyChanged(nameof(AccountSwitchText));
-                this.RaisePropertyChanged(nameof(LogoutText));
-                this.RaisePropertyChanged(nameof(AccountControlsVisible));
-                this.RaisePropertyChanged(nameof(AccountSwitchVisible));
-            });
+        _loginMgr.OnActiveAccountChanged += () =>
+        {
+            this.RaisePropertyChanged(nameof(LoginText));
+            this.RaisePropertyChanged(nameof(AccountSwitchText));
+            this.RaisePropertyChanged(nameof(LogoutText));
+            this.RaisePropertyChanged(nameof(AccountControlsVisible));
+            this.RaisePropertyChanged(nameof(AccountSwitchVisible));
+        };
 
         _loginMgr.Logins.Connect().Subscribe(_ =>
         {
@@ -106,6 +105,7 @@ public class AccountDropDownViewModel : ViewModelBase
 
         IsDropDownOpen = false;
         _mainVm.TrySwitchToAccount(loggedInAccount);
+        _mainVm.SetLoginMenuShowing(false);
     }
 
     public void AddAccountPressed()
@@ -113,6 +113,7 @@ public class AccountDropDownViewModel : ViewModelBase
         IsDropDownOpen = false;
 
         _loginMgr.SetActiveAccount(null);
+        _mainVm.SetLoginMenuShowing(true);
     }
 }
 
