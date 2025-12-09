@@ -16,3 +16,4 @@ Features include:
   - Allows you to change the default hub API used for the server tabs (however it defaults to the [wizden hub *mirror*](https://cdn.spacestationmultiverse.com/wizden-hub-mirror/))
   - Per-account settings; you can have settings be different values for specific accounts
   - - HWId seed: when the HWId spoofing patch is enabled and active, the randomly generated HWId uses this seed to stay the same if the seed is the same.
+  - Options to either disable or spoof (with a random value) the unique header which the launcher sends in every HTTP request, that can be used as a vector of detection.
