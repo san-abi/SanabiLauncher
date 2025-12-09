@@ -13,6 +13,8 @@ using ReactiveUI.Fody.Helpers;
 using SS14.Launcher.Api;
 using SS14.Launcher.Models.Data;
 using static SS14.Launcher.Api.HubApi;
+using Sanabi.Framework.Data;
+using SS14.Launcher.ViewModels;
 
 namespace SS14.Launcher.Models.ServerStatus;
 
@@ -57,10 +59,10 @@ public sealed class ServerListCache : ReactiveObject, IServerSource
         _refreshCancel?.Cancel();
         _allServers.Clear();
         _refreshCancel = new CancellationTokenSource(10000);
-        RefreshServerList(ConfigConstants.DefaultHubUrls, _refreshCancel.Token);
+        RefreshServerList(_refreshCancel.Token);
     }
 
-    public async void RefreshServerList(UrlFallbackSet[] hubUrls, CancellationToken cancel)
+    public async void RefreshServerList(CancellationToken cancel)
     {
         _allServers.Clear();
         Status = RefreshListStatus.UpdatingMaster;
@@ -71,16 +73,13 @@ public sealed class ServerListCache : ReactiveObject, IServerSource
             var requests = new List<(Task<ServerListEntry[]> Request, Uri Hub)>();
             var allSucceeded = true;
 
-            // Queue requests
-            foreach (var hub in hubUrls)
-            {
-                requests.Add((_hubApi.GetServers(hub, cancel), new Uri(hub.Urls[0])));
-            }
+            // Queue requests: default hub(s)
+            foreach (var hubAddress in HubSettingsViewModel.EnabledDefaultHubs)
+                requests.Add((_hubApi.GetServers(UrlFallbackSet.FromSingle(hubAddress), cancel), new Uri(hubAddress, UriKind.Absolute)));
 
+            // Queue requests: custom hubs
             foreach (var hub in _dataManager.Hubs.OrderBy(h => h.Priority))
-            {
                 requests.Add((_hubApi.GetServers(UrlFallbackSet.FromSingle(hub.Address), cancel), hub.Address));
-            }
 
             // Await all requests
             try

@@ -52,4 +52,16 @@ public static partial class SanabiCVars
     ///     Does the launcher start logged in or logged out?
     /// </summary>
     public static readonly CVarDef<bool> StartLoggedIn = CVarDef.Create("StartLoggedIn", false);
+
+
+    /// <summary>
+    ///     In hub settings, do we use the hub that the launcher uses
+    ///         as default?
+    ///
+    ///     This setting exists so that you can willingly enable/disable
+    ///         the default hub and not need to remember it's URL,
+    ///         opposed to outright removing the default hub and requiring
+    ///         the user to have it manually listed as a hub.
+    /// </summary>
+    public static readonly CVarDef<bool> EnableStockHub = CVarDef.Create("EnableStockHub", true);
 }

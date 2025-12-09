@@ -166,9 +166,13 @@ public sealed class DataManager : ReactiveObject
     public IObservableCache<InstalledEngineVersion, string> EngineInstallations => _engineInstallations;
     public IEnumerable<InstalledEngineModule> EngineModules => _modules;
     public ICollection<ServerFilter> Filters { get; }
+
+    /// <summary>
+    ///     Excludes default hub.
+    /// </summary>
     public ICollection<Hub> Hubs { get; }
 
-    public bool HasCustomHubs => Hubs.Count > 0;
+    public bool HasCustomHubs => Hubs.Count > 1;
 
     public bool ActuallyMultiAccounts =>
 #if DEBUG

@@ -50,7 +50,7 @@ public sealed class MainWindowViewModel : ViewModelBase, IErrorOverlayOwner
         _infoManager = Locator.Current.GetRequiredService<LauncherInfoManager>();
         _loc = LocalizationManager.Instance;
 
-        ServersTab = new ServerListTabViewModel(this);
+        ServersTab = new ServerListTabViewModel(this, _cfg);
         NewsTab = new NewsTabViewModel();
         HomeTab = new HomePageViewModel(this);
         OptionsTab = new OptionsTabViewModel();

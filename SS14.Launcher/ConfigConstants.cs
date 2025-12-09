@@ -31,7 +31,17 @@ public static class ConfigConstants
     private static readonly UrlFallbackSetStats StatsHubInfra = new(2);
 
     public static readonly UrlFallbackSet AuthUrl = new(["https://auth.spacestation14.com/", "https://auth.fallback.spacestation14.com/"], StatsHubInfra);
+
+    /// <summary>
+    ///     Base wizden hub URL(s).
+    /// </summary>
     public static readonly UrlFallbackSet[] DefaultHubUrls = [new(["https://hub.spacestation14.com/", "https://hub.fallback.spacestation14.com/"], StatsHubInfra)];
+
+    /// <summary>
+    ///     Mirror wizden hub URL(s).
+    ///         Includes `https://cdn.spacestationmultiverse.com/wizden-hub-mirror/`.
+    /// </summary>
+    public static readonly UrlFallbackSet[] MirrorHubUrls = [new(["https://cdn.spacestationmultiverse.com/wizden-hub-mirror/"])];
     public const string DiscordUrl = "https://discord.ss14.io/";
     public const string AccountBaseUrl = "https://account.spacestation14.com/Identity/Account/";
     public const string AccountManagementUrl = $"{AccountBaseUrl}Manage";

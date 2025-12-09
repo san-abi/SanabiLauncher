@@ -7,6 +7,7 @@ using ReactiveUI;
 using ReactiveUI.Fody.Helpers;
 using Splat;
 using SS14.Launcher.Localization;
+using SS14.Launcher.Models.Data;
 using SS14.Launcher.Models.ServerStatus;
 using SS14.Launcher.Utility;
 
@@ -15,6 +16,7 @@ namespace SS14.Launcher.ViewModels.MainWindowTabs;
 public class ServerListTabViewModel : MainWindowTabViewModel
 {
     private readonly LocalizationManager _loc = LocalizationManager.Instance;
+    private readonly DataManager _dataManager;
     private readonly MainWindowViewModel _windowVm;
     private readonly ServerListCache _serverListCache;
 
@@ -64,12 +66,15 @@ public class ServerListTabViewModel : MainWindowTabViewModel
         }
     }
 
+    public bool NoHubsPresent { get; set; }
     [Reactive] public bool FiltersVisible { get; set; }
 
     public ServerListFiltersViewModel Filters { get; }
 
-    public ServerListTabViewModel(MainWindowViewModel windowVm)
+    public ServerListTabViewModel(MainWindowViewModel windowVm, DataManager dataManager)
     {
+        _dataManager = dataManager;
+
         Filters = new ServerListFiltersViewModel(windowVm.Cfg, _loc);
         Filters.FiltersUpdated += FiltersOnFiltersUpdated;
 
@@ -87,6 +92,9 @@ public class ServerListTabViewModel : MainWindowTabViewModel
                     this.RaisePropertyChanged(nameof(SpinnerVisible));
                     break;
             }
+
+            NoHubsPresent = _dataManager.Hubs.Count == 0 && HubSettingsViewModel.EnabledDefaultHubs.Length == 0;
+            this.RaisePropertyChanged(nameof(NoHubsPresent));
         };
 
         _loc.LanguageSwitched += () => Filters.UpdatePresentFilters(_serverListCache.AllServers);
