@@ -510,22 +510,7 @@ public sealed class DataManager : ReactiveObject
     ///     Sets a CVar linked to a <see cref="Guid"/>.
     /// </summary>
     public void SetAccountCVar<T>(CVarDef<T> cVarDef, Guid guid, T value)
-    {
-        var entry = (CVarEntry<T>)GetAccountCVarEntry(cVarDef, guid);
-        if (EqualityComparer<T>.Default.Equals(entry.ValueInternal, value))
-            return;
-
-        entry.ValueInternal = value;
-        entry.FireValueChanged();
-
-        AddDbCommand(con => con.Execute(
-            "INSERT OR REPLACE INTO Config VALUES (@Key, @Value)",
-            new
-            {
-                Key = GetAccountCVarIdentifier(cVarDef, guid),
-                Value = value
-            }));
-    }
+        => SetCVar(cVarDef, value, dbKey: GetAccountCVarIdentifier(cVarDef, guid));
 
     /// <summary>
     ///     Sets a CVar linked to the <see cref="Guid"/> of the
@@ -680,9 +665,8 @@ public sealed class DataManager : ReactiveObject
         return (CVarEntry<T>)_configEntries[cVar.Name];
     }
 
-    public void SetCVar<T>([ValueProvider("SS14.Launcher.Models.Data.CVars")] CVarDef<T> cVar, T value)
+    public void SetCVar<T>([ValueProvider("SS14.Launcher.Models.Data.CVars")] CVarDef<T> cVar, T value, string? dbKey = null)
     {
-        var name = cVar.Name;
         var entry = (CVarEntry<T>)_configEntries[cVar.Name];
         if (EqualityComparer<T>.Default.Equals(entry.ValueInternal, value))
             return;
@@ -694,7 +678,7 @@ public sealed class DataManager : ReactiveObject
             "INSERT OR REPLACE INTO Config VALUES (@Key, @Value)",
             new
             {
-                Key = name,
+                Key = dbKey ??= cVar.Name,
                 Value = value
             }));
     }
