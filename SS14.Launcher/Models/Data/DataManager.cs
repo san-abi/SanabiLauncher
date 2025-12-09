@@ -464,7 +464,7 @@ public sealed class DataManager : ReactiveObject
     /// </summary>
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
     public static string GetAccountCVarIdentifier(string cVarName, Guid guid)
-        => guid.ToString() + cVarName;
+        => guid.ToString() + "::ACCOUNT::" + cVarName;
 
 
     /// <inheritdoc cref="GetAccountCVarIdentifier(string, Guid)"/>
