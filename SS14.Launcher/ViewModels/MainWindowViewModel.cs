@@ -166,8 +166,6 @@ public sealed class MainWindowViewModel : ViewModelBase, IErrorOverlayOwner
     {
         BusyTask = _loc.GetString("main-window-busy-checking-update");
         await CheckLauncherUpdate();
-        BusyTask = _loc.GetString("main-window-busy-checking-login-status");
-        await CheckAccounts();
         BusyTask = null;
 
         if (_cfg.SelectedLoginId is { } g && _loginMgr.Logins.TryLookup(g, out var login))
@@ -176,12 +174,6 @@ public sealed class MainWindowViewModel : ViewModelBase, IErrorOverlayOwner
         }
 
         // We should now start reacting to commands.
-    }
-
-    private async Task CheckAccounts()
-    {
-        // Check if accounts are still valid and refresh their tokens if necessary.
-        await _loginMgr.Initialize();
     }
 
     public void OnDiscordButtonPressed()

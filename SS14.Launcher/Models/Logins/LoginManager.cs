@@ -1,8 +1,6 @@
 using System;
-using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
-using Avalonia.Threading;
 using DynamicData;
 using ReactiveUI;
 using Serilog;
@@ -86,25 +84,6 @@ public sealed class LoginManager : ReactiveObject
             .AsObservableCache();
     }
 
-    public async Task Initialize()
-    {
-        // Set up timer so that if the user leaves their launcher open for a month or something
-        // his tokens don't expire.
-        _timer = DispatcherTimer.Run(() =>
-        {
-            async void Impl()
-            {
-                await RefreshAllTokens();
-            }
-
-            Impl();
-            return true;
-        }, ConfigConstants.TokenRefreshInterval, DispatcherPriority.Background);
-
-        // Refresh all tokens we got.
-        await RefreshAllTokens();
-    }
-
     private async Task RefreshAllTokens()
     {
         Log.Debug("Refreshing all tokens.");
@@ -143,6 +122,38 @@ public sealed class LoginManager : ReactiveObject
                 Log.Warning(e, "AuthApiException while trying to refresh token for {login}", l.LoginInfo);
             }
         }));
+    }
+
+    /// <summary>
+    ///     Refreshes token(s) for the specified account.
+    /// </summary>
+    public async Task RefreshTokens(ActiveLoginData loginData)
+    {
+        if (loginData.Status == AccountLoginStatus.Expired)
+        {
+            // Literally don't even bother we already know it's dead and the user has to solve it.
+            Log.Debug("Token for {login} is already expired", loginData.LoginInfo);
+            return;
+        }
+
+        if (loginData.LoginInfo.Token.IsTimeExpired())
+        {
+            // Oh hey, time expiry.
+            Log.Debug("Token for {login} expired due to time", loginData.LoginInfo);
+            loginData.SetStatus(AccountLoginStatus.Expired);
+            return;
+        }
+
+        try
+        {
+            await UpdateSingleAccountStatus(loginData);
+        }
+        catch (AuthApiException e)
+        {
+            // TODO: Maybe retry to refresh tokens sooner if an error occured.
+            // Ignore, I guess.
+            Log.Warning(e, "AuthApiException while trying to refresh token for {login}", loginData.LoginInfo);
+        }
     }
 
     public void AddFreshLogin(LoginInfo info)
@@ -194,9 +205,9 @@ public sealed class LoginManager : ReactiveObject
         }
     }
 
-    private sealed class ActiveLoginData : LoggedInAccount
+    public sealed class ActiveLoginData : LoggedInAccount
     {
-        private AccountLoginStatus _status;
+        public AccountLoginStatus _status;
 
         public ActiveLoginData(LoginInfo info) : base(info)
         {
