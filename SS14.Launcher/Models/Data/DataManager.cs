@@ -129,6 +129,8 @@ public sealed class DataManager : ReactiveObject
             return;
 
         AssignAccountCVars([newlyActiveAccount.UserId], typeof(SanabiAccountCVars), overwrite: false);
+
+        // This is NOT amazing
         LoadCVarsFromSqlite(sqliteConnection: null);
     }
 
