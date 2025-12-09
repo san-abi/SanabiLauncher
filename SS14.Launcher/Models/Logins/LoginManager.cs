@@ -23,40 +23,55 @@ public sealed class LoginManager : ReactiveObject
     private readonly DataManager _cfg;
     private readonly AuthApi _authApi;
 
-    private IDisposable? _timer;
-
     private Guid? _activeLoginId;
 
     private readonly IObservableCache<ActiveLoginData, Guid> _logins;
 
-    public Guid? ActiveAccountId
+    /// <summary>
+    ///     ID of the currently active account, if any.
+    ///         Should not be set directly.
+    /// </summary>
+    public Guid? ActiveAccountId { get => _activeLoginId; }
+
+    /// <summary>
+    ///     <see cref="ActiveLoginData"> of the currently active
+    ///         account, if any.
+    ///
+    ///     Should not be set directly.
+    /// </summary>
+    public LoggedInAccount? ActiveAccount { get => _activeLoginId == null ? null : _logins.Lookup(_activeLoginId.Value).Value; }
+
+    /// <summary>
+    ///     Sets a new account to be active in by it's ID, or logs out (if possible)
+    ///         if none is provided.
+    /// </summary>
+    /// <param name="value">The account ID, if any.</param>
+    /// <exception cref="ArgumentException">Thrown when setting a new active account, but there is no login data for it.</exception>
+    public void SetActiveAccountById(Guid? value)
     {
-        get => _activeLoginId;
-        set
+        if (value != null)
         {
-            if (value != null)
-            {
-                var lookup = _logins.Lookup(value.Value);
+            var lookup = _logins.Lookup(value.Value);
 
-                if (!lookup.HasValue)
-                {
-                    throw new ArgumentException("We do not have a login with that ID.");
-                }
-            }
-
-            this.RaiseAndSetIfChanged(ref _activeLoginId, value);
-            this.RaisePropertyChanged(nameof(ActiveAccount));
-            _cfg.SelectedLoginId = value;
-
-            if (_cfg.GetCVar(SanabiCVars.SpoofFingerprintOnLogin))
-                _cfg.RegenerateSpoofedFingerprint();
+            if (!lookup.HasValue)
+                throw new ArgumentException("We do not have a login with that ID.");
         }
+
+        this.RaiseAndSetIfChanged(ref _activeLoginId, value);
+        this.RaisePropertyChanged(nameof(ActiveAccount));
+        _cfg.SelectedLoginId = value;
+
+        if (_cfg.GetCVar(SanabiCVars.SpoofFingerprintOnLogin))
+            _cfg.RegenerateSpoofedFingerprint();
     }
 
-    public LoggedInAccount? ActiveAccount
+    /// <summary>
+    ///     Sets a new account via a <see cref="LoggedInAccount"/>. Logs out
+    ///         if none is provided.
+    /// </summary>
+    public void SetActiveAccount(LoggedInAccount? loggedInAccount)
     {
-        get => _activeLoginId == null ? null : _logins.Lookup(_activeLoginId.Value).Value;
-        set => ActiveAccountId = value?.UserId;
+        _activeLoginId = loggedInAccount?.UserId;
     }
 
     public IObservableCache<LoggedInAccount, Guid> Logins { get; }
@@ -72,9 +87,7 @@ public sealed class LoginManager : ReactiveObject
             .OnItemRemoved(p =>
             {
                 if (p.LoginInfo.UserId == _activeLoginId)
-                {
-                    ActiveAccount = null;
-                }
+                    SetActiveAccount(null);
             })
             .AsObservableCache();
 

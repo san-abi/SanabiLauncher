@@ -251,11 +251,11 @@ public sealed class MainWindowViewModel : ViewModelBase, IErrorOverlayOwner
                 break;
 
             case AccountLoginStatus.Available:
-                _loginMgr.ActiveAccount = account;
+                _loginMgr.SetActiveAccount(account);
                 break;
 
             case AccountLoginStatus.Expired:
-                _loginMgr.ActiveAccount = null;
+                _loginMgr.SetActiveAccount(null);
                 LoginViewModel.SwitchToExpiredLogin(account);
                 break;
         }

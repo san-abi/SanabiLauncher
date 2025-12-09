@@ -80,13 +80,13 @@ public class LoginViewModel : BaseLoginViewModel
                 // if the user used the main login prompt on an account we already had, but as expired.
 
                 await authApi.LogoutTokenAsync(oldLogin.Value.LoginInfo.Token.Token);
-                loginMgr.ActiveAccountId = loginInfo.UserId;
+                loginMgr.SetActiveAccountById(loginInfo.UserId);
                 loginMgr.UpdateToNewToken(loginMgr.ActiveAccount!, loginInfo.Token);
                 return true;
             }
 
             loginMgr.AddFreshLogin(loginInfo);
-            loginMgr.ActiveAccountId = loginInfo.UserId;
+            loginMgr.SetActiveAccountById(loginInfo.UserId);
             return true;
         }
 

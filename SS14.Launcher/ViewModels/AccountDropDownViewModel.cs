@@ -112,7 +112,7 @@ public class AccountDropDownViewModel : ViewModelBase
     {
         IsDropDownOpen = false;
 
-        _loginMgr.ActiveAccount = null;
+        _loginMgr.SetActiveAccount(null);
     }
 }
 
