@@ -3,8 +3,8 @@
 
   <PropertyGroup>
     <OutputType>WinExe</OutputType>
-    <TargetFramework>net9.0-windows</TargetFramework>
-    <PublishAot>true</PublishAot>
+    <TargetFramework>net10.0-windows</TargetFramework>
+    <PublishAot>false</PublishAot>
     <TargetName>Space Station 14 Launcher</TargetName>
     <ApplicationIcon>../SS14.Launcher/Assets/icon.ico</ApplicationIcon>
 
